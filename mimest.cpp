@@ -3,6 +3,8 @@ author: Nobutaka Kim
 disclaimer: code uses snippets under 8 lines from Stackoverflow and other sources without citations
 General algorithm from https://github.com/diogoff/unlabelled-event-logs
 Use of OpenMP and Cuda to follow
+
+test with mimgen.py created sequence.text first then try porting
 */
 #include <cmath>
 #include <vector>
@@ -11,6 +13,8 @@ Use of OpenMP and Cuda to follow
 #include <set>
 #include <iostream>
 #include <algorithm>
+
+#include "utils.h"
 
 static bool compareSToPrevSeqs(std::vector<int> s, std::vector<std::vector<int>> prevseqs){
     bool vecsMatch = false;
@@ -56,6 +60,7 @@ static std::string seq2str(std::vector<char> seq){
     }
     return str;
 }
+
 
 
 
@@ -217,6 +222,7 @@ class Model{
                     b = y[k][r+1];
                     M[a][b] += 1.0;
 
+
                 }
                 a = y[k][y.size()-1];
                 b = END;
@@ -233,11 +239,7 @@ class Model{
             for(auto iter = y.begin(); iter != y.end(); ++iter){
                 
             }
-
-
-
             return probs;
-
         }
 
         //checks that it is possible to recover the symbol sequence x from the separate sequences y (sanity check)
@@ -257,11 +259,13 @@ class Model{
                 x2.push_back(xn);
             }
             return (x2 == x);
-
-
         }
-
-
 };
+
+int main(){
+    std::vector<char> x;
+
+    
+}
 
 

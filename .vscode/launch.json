@@ -8,8 +8,10 @@
       "args": [],
       "stopAtEntry": false,
       "externalConsole": false,
-      "cwd": "/home/nobu/Documents/ProcessMining/cpp-unlabelled-event-logs",
-      "program": "/home/nobu/Documents/ProcessMining/cpp-unlabelled-event-logs/build/Debug/outDebug",
+      "cwd": "/home/nobu/Documents/ProcessMining/cpp-process-mining/learn",
+      "program": "/home/nobu/Documents/ProcessMining/cpp-process-mining/learn/sortmapByValue.cpp",
+
+      //"program": "/home/nobu/Documents/ProcessMining/cpp-unlabelled-event-logs/build/Debug/outDebug",
       "MIMode": "gdb",
       "miDebuggerPath": "gdb",
       "setupCommands": [

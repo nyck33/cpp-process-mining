@@ -10,6 +10,18 @@ Use of OpenMP and Cuda to follow
 #include <string>
 #include <set>
 #include <iostream>
+#include <algorithm>
+
+static bool compareVectors(std::vector<int> a, std::vector<int> b){
+    //check that vectors are same size
+    if(a.size() != b.size()){
+        return false;
+    }
+    
+    std::sort(a.begin(), a.end());
+    std::sort(b.begin(), b.end());
+    return (a==b);
+}
 
 void normalize(std::map<char, double> &gmNestedMap){
     double rowsum = 0.0;
@@ -42,7 +54,7 @@ class Model{
 	#   //char: {char : double}}
         std::map<char, std::map<char, double>> gM;
         //transition matrix
-        std::map<char, int> M;
+        std::map<char, std::map<char, double>> M;
         //src sequence TBD
         std::vector<char> s;
         //separate source sequences (y^{(k)} in the paper)
@@ -92,7 +104,9 @@ class Model{
         size_t estimate(){
             std::vector<std::vector<char>> prevsseqs;
             std::cout << "Initializing source sequence..." << std::endl;
-        
+            estsources(gM);
+            int its = 0;
+            while(s)       
 
         }
 
@@ -146,13 +160,34 @@ class Model{
         }   
 
         size_t estparams(){
-            char a;
+            char a, b, k;
             
             M.clear();
             for(int i=0; i < D.size(); i++){
                 a = D[i];
                 std::map<char, double> nestedMap;
-                M[a] = nestedMap;
+                for(int j=0; j < D.size(); j++){
+                    b = D[j];
+                    M[a][b] = 0.0; 
+                }
+            }
+            for(auto iter = y.begin(); iter!= y.end(); ++iter){
+                k = iter->first;
+                a = BEGIN;
+                b = y[k][0];
+
+                for(int r=0; r < (y[k].size() - 1); r++){
+                    a = y[k][r];
+                    b = y[k][r+1];
+                    M[a][b] += 1.0;
+
+                }
+                a = y[k][y.size()-1];
+                b = END;
+                M[a][b] += 1.0;
+            }
+            for(auto a: D){
+                normalize(M[a]);
             }
 
 

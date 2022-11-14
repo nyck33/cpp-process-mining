@@ -13,8 +13,21 @@ test with mimgen.py created sequence.text first then try porting
 #include <set>
 #include <iostream>
 #include <algorithm>
+#include <fstream>
 
 #include "utils.h"
+
+
+static bool compareVectors(std::vector<int> a, std::vector<int> b){
+    //check that vectors are same size
+    if(a.size() != b.size()){
+        return false;
+    }
+    
+    std::sort(a.begin(), a.end());
+    std::sort(b.begin(), b.end());
+    return (a==b);
+}
 
 static bool compareSToPrevSeqs(std::vector<int> s, std::vector<std::vector<int>> prevseqs){
     bool vecsMatch = false;
@@ -27,16 +40,7 @@ static bool compareSToPrevSeqs(std::vector<int> s, std::vector<std::vector<int>>
     return false;
 }
 
-static bool compareVectors(std::vector<int> a, std::vector<int> b){
-    //check that vectors are same size
-    if(a.size() != b.size()){
-        return false;
-    }
-    
-    std::sort(a.begin(), a.end());
-    std::sort(b.begin(), b.end());
-    return (a==b);
-}
+
 
 static void normalize(std::map<char, double> &gmNestedMap){
     double rowsum = 0.0;
@@ -86,7 +90,7 @@ class Model{
         //separate source sequences (y^{(k)} in the paper)
         std::map<int, std::vector<char>> y;
 
-        Model(std::vector<char> xIn, std::vector<char> DIn){
+        Model(std::vector<char> xIn){
             x = xIn;
             N = x.size();
             //build D, set of symbols
@@ -127,8 +131,17 @@ class Model{
             }
         }
 
-        void printModel(){
+        void printModel( std::map<char, std::map<char, double>> T){
+            //https://stackoverflow.com/a/15553559/9481613
+            std::cout << "Transition Matrix M:" << std::endl;
+            for(auto iter = T.begin(); iter != T.end(); iter++){
+                std::cout << iter->first << ": " << std::endl;
+                std::map<char, double> nestedMap = iter->second;
+                for(auto iter2 = nestedMap.begin(); iter2 != nestedMap.end(); iter2++){
+                    std::cout << iter2->first << ": " << iter2->second << std::endl;
+                }
 
+            }
         }
 
         size_t estimate(){
@@ -151,7 +164,7 @@ class Model{
 
         }
 
-        size_t estsources(std::map<char, std::map<char, double>> T){
+        void estsources(std::map<char, std::map<char, double>> T){
             double pmax, p, pnext;
             int sn;
             char xn, b, bnext;
@@ -200,7 +213,7 @@ class Model{
             }
         }   
 
-        size_t estparams(){
+        void estparams(){
             char a, b, k;
             
             M.clear();
@@ -234,11 +247,18 @@ class Model{
         }
         
         //computes the probability distribution for the different sequences produced by this model (p(z) or q(z) in the paper)
-        std::map<char, double> computePDistForSequences(){
+        std::map<char, double> seqprobs(){
             std::map<char, double> probs;
             for(auto iter = y.begin(); iter != y.end(); ++iter){
-                
+                std::string z = seq2str(iter->second);
+                if(probs.find(z[0]) != probs.end()){
+                    probs[z[0]] += 1.0;
+                }else{
+                    probs[z[0]] = 1.0;
+                }
+
             }
+            normalize(probs);
             return probs;
         }
 
@@ -264,8 +284,41 @@ class Model{
 
 int main(){
     std::vector<char> x;
+    char curr;
 
-    
+    std::fstream newfile;
+    newfile.open("/learn/sequence.txt", std::ios::in);
+    if(newfile.is_open()){
+        std::string tp;
+        //trim: https://stackoverflow.com/a/216883/9481613
+        while(getline(newfile, tp)){
+            //std::cout << tp << std::endl;
+            curr = tp[0];
+            x.push_back(curr);
+        }
+        newfile.close();
+    }
+    std::cout << "symbol sequence: " << seq2str(x) << std::endl;
+
+    std::cout << x.size() << " symbols" << std::endl;
+
+    //create model
+    Model m = Model(x);
+
+    //estimate model
+    size_t K = m.estimate();
+
+    bool modelCorrect = m.checkmodel();
+    //print transition mat M
+    m.printModel(m.M);
+
+    std::map<char, double> probs = m.seqprobs(); 
+
+    sortByValue(probs);
+
+    std::cout << "Total number of sources: " << K << std::endl;
+
+  
 }
 
 

@@ -3,7 +3,7 @@
 #include <vector>
 #include <algorithm>
 
-bool cmp(std::pair<std::string, double>& a,
+bool cmp(std::pair<char, double>& a,
 std::pair<std::string, double>& b);
 
-void sortByValue(std::map<std::string, double>& M);
+void sortByValue(std::map<char, double>& M);

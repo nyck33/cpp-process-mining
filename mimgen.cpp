@@ -2,29 +2,59 @@
 #include <vector>
 #include <map>
 #include <string>
+#include <fstream>
+#include <iostream>
+#include <unistd.h>
+#include <algorithm>
 
-void normalize(){}
+//func prototypes
+void printseqs();
 
-class Model{
-    public:
-        char BEGIN='o';
-        char END = 'x';
+//global variables
 
-        std::vector<char> x; 
-        int N= 0;
-        std::vector<char> D;
+char* getCmdOptions(char** begin, char** end, const std::string &option){
+    char** itr = std::find(begin, end, option);
+    if(itr != end && ++itr != end){
+        return *itr;
+    }
+    return 0;
+}
 
-        std::map<int, std::string> gM;
+bool cmdOptionExists(char** begin, char** end, const std::string &option){
+    //single word option ie. -h for help
+    return std::find(begin, end, option) != end;
+}
 
-        std::map<char, int> M;
+int main(int argc, char* argv[]){
+    int ninstances, overlap;
+    char* inputDistributionFile, outputSymbolFile;
+    //read cmd line arguments: https://stackoverflow.com/a/868894/9481613
+    //mimgen 20 5 example.txt sequence.txt
+    //prog --instances 20 --max-overlapping 5 --inputDist example --outSymbol sequence 
+    //prog -n 20 -m 5 -i example.txt -o sequence.txt
 
-        std::vector<char> s;
+    char* numInstancesStr = getCmdOptions(argv, argv+argc, "-n");
+    
+    if(numInstancesStr){
+        //https://stackoverflow.com/a/23567980/9481613
+        ninstances = std::stoi(numInstancesStr);        
+    }
 
-        std::map<char, char> y;
+    char* overlapStr = getCmdOptions(argv, argv+argc, "-m");
 
+    if(overlapStr){
+        overlap = std::stoi(overlapStr);
+    }
+
+}
+
+
+
+
+
+        
         
 
 
 
 
-}

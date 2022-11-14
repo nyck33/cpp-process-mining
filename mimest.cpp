@@ -12,6 +12,17 @@ Use of OpenMP and Cuda to follow
 #include <iostream>
 #include <algorithm>
 
+static bool compareSToPrevSeqs(std::vector<int> s, std::vector<std::vector<int>> prevseqs){
+    bool vecsMatch = false;
+    for(auto vec : prevseqs){
+        vecsMatch = compareVectors(s, vec);
+        if(vecsMatch == true){
+            return true;
+        }
+    }
+    return false;
+}
+
 static bool compareVectors(std::vector<int> a, std::vector<int> b){
     //check that vectors are same size
     if(a.size() != b.size()){
@@ -23,7 +34,7 @@ static bool compareVectors(std::vector<int> a, std::vector<int> b){
     return (a==b);
 }
 
-void normalize(std::map<char, double> &gmNestedMap){
+static void normalize(std::map<char, double> &gmNestedMap){
     double rowsum = 0.0;
     for(auto iter = gmNestedMap.begin(); iter!= gmNestedMap.end(); ++iter){
         char symbol = iter->first;
@@ -37,6 +48,16 @@ void normalize(std::map<char, double> &gmNestedMap){
         }
     }    
 }
+
+static std::string seq2str(std::vector<char> seq){
+    std::string str = "";
+    for(auto elem : seq){
+        str += elem;
+    }
+    return str;
+}
+
+
 
 
 class Model{
@@ -56,7 +77,7 @@ class Model{
         //transition matrix
         std::map<char, std::map<char, double>> M;
         //src sequence TBD
-        std::vector<char> s;
+        std::vector<int> s;
         //separate source sequences (y^{(k)} in the paper)
         std::map<int, std::vector<char>> y;
 
@@ -67,22 +88,25 @@ class Model{
             D.push_back(BEGIN);
             //eliminate duplicates and sort vector x
             //https://stackoverflow.com/a/1041939/9481613
-            std::set<char> s;
+            std::set<char> sortedSetX;
             unsigned size = x.size();
+            //eliminate duplicates
             for(unsigned i = 0; i < size; ++i){
-                s.insert(x[i]);
+                sortedSetX.insert(x[i]);
             }
+            //sort
+            sort(sortedSetX.begin(), sortedSetX.end());
+            //push into vector
             for(auto itr: s){
                 D.push_back(itr);
             }
             D.push_back(END);
-
-            for(auto &elementA : D){
-                for(auto &elementB : D){
+            //init gM to 0.0
+            for(auto elementA : D){
+                for(auto elementB : D){
                     gM[elementA][elementB] = 0.0;
                 }
             }
-            
             //build gM
             int n;
             for(n=0; n < (N-1); ++n){
@@ -92,8 +116,9 @@ class Model{
             }
             for(auto iter = gM.begin(); iter!= gM.end(); ++iter){
                 //make sure nestedMap is a reference 
-                std::map<char,double> &nestedMap = iter->second;
-                normalize(nestedMap);
+                //std::map<char,double> &nestedMap = iter->second;
+                //https://www.tutorialspoint.com/differences-between-pass-by-value-and-pass-by-reference-in-cplusplus
+                normalize(iter->second);
             }
         }
 
@@ -102,11 +127,22 @@ class Model{
         }
 
         size_t estimate(){
-            std::vector<std::vector<char>> prevsseqs;
+            std::vector<std::vector<int>> prevsseqs;
             std::cout << "Initializing source sequence..." << std::endl;
             estsources(gM);
             int its = 0;
-            while(s)       
+            //compare s to each vector in vector of vectors prevsseqs
+            while(!compareSToPrevSeqs(s,prevsseqs)){
+                its += 1;
+                std::cout << "# " << its << ": Estimating parameters..." << std::endl;
+                estparams();
+                prevsseqs.push_back(s);
+                std::cout << "# " << its << ": Computing source sequence..." << std::endl;
+                estsources(M);
+
+            }   
+
+            return std::set(s.begin(), s.end()).size();    
 
         }
 
@@ -189,9 +225,43 @@ class Model{
             for(auto a: D){
                 normalize(M[a]);
             }
+        }
+        
+        //computes the probability distribution for the different sequences produced by this model (p(z) or q(z) in the paper)
+        std::map<char, double> computePDistForSequences(){
+            std::map<char, double> probs;
+            for(auto iter = y.begin(); iter != y.end(); ++iter){
+                
+            }
+
+
+
+            return probs;
+
+        }
+
+        //checks that it is possible to recover the symbol sequence x from the separate sequences y (sanity check)
+        bool checkmodel(){
+            int sn;
+            char xn;
+
+            std::vector<char> x2;
+            std::map<int, int> pos;
+            for(auto iter = y.begin(); iter!= y.end(); ++iter){
+                pos[iter->first] = -1;
+            }
+            for(int n = 0; n < s.size(); n++){
+                sn = s[n];
+                pos[sn] += 1;
+                xn = y[sn][pos[sn]];
+                x2.push_back(xn);
+            }
+            return (x2 == x);
 
 
         }
+
+
 };
 
 

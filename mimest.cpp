@@ -14,60 +14,9 @@ test with mimgen.py created sequence.text first then try porting
 #include <iostream>
 #include <algorithm>
 #include <fstream>
+#include <iterator>
 
 #include "utils.h"
-
-
-static bool compareVectors(std::vector<int> a, std::vector<int> b){
-    //check that vectors are same size
-    if(a.size() != b.size()){
-        return false;
-    }
-    
-    std::sort(a.begin(), a.end());
-    std::sort(b.begin(), b.end());
-    return (a==b);
-}
-
-static bool compareSToPrevSeqs(std::vector<int> s, std::vector<std::vector<int>> prevseqs){
-    bool vecsMatch = false;
-    for(auto vec : prevseqs){
-        vecsMatch = compareVectors(s, vec);
-        if(vecsMatch == true){
-            return true;
-        }
-    }
-    return false;
-}
-
-
-
-static void normalize(std::map<char, double> &gmNestedMap){
-    double rowsum = 0.0;
-    for(auto iter = gmNestedMap.begin(); iter!= gmNestedMap.end(); ++iter){
-        char symbol = iter->first;
-        double prob = iter->second;
-
-        rowsum += prob; 
-    }
-    if(rowsum > 0.0){
-        for(auto iter = gmNestedMap.begin(); iter!= gmNestedMap.end(); ++iter){
-            gmNestedMap[iter->first] = (gmNestedMap[iter->first] / rowsum); 
-        }
-    }    
-}
-
-static std::string seq2str(std::vector<char> seq){
-    std::string str = "";
-    for(auto elem : seq){
-        str += elem;
-    }
-    return str;
-}
-
-
-
-
 
 class Model{
     public:
@@ -103,11 +52,9 @@ class Model{
             for(unsigned i = 0; i < size; ++i){
                 sortedSetX.insert(x[i]);
             }
-            //sort
-            sort(sortedSetX.begin(), sortedSetX.end());
-            //push into vector
-            for(auto itr: s){
-                D.push_back(itr);
+            //sort: https://linuxhint.com/sorting-elements-cpp-set/
+            for(std::set<char>::iterator iter = sortedSetX.begin(); iter != sortedSetX.end(); iter++){
+                D.push_back(*iter);
             }
             D.push_back(END);
             //init gM to 0.0
@@ -159,8 +106,8 @@ class Model{
                 estsources(M);
 
             }   
-
-            return std::set(s.begin(), s.end()).size();    
+            //return num unique items
+            return count_items(s);
 
         }
 
@@ -217,16 +164,16 @@ class Model{
             char a, b, k;
             
             M.clear();
-            for(int i=0; i < D.size(); i++){
-                a = D[i];
+            for(char i : D){
+                a = i;
                 std::map<char, double> nestedMap;
-                for(int j=0; j < D.size(); j++){
-                    b = D[j];
+                for(char j : D){
+                    b = j;
                     M[a][b] = 0.0; 
                 }
             }
-            for(auto iter = y.begin(); iter!= y.end(); ++iter){
-                k = iter->first;
+            for(auto & iter : y){
+                k = iter.first;
                 a = BEGIN;
                 b = y[k][0];
 
@@ -249,8 +196,8 @@ class Model{
         //computes the probability distribution for the different sequences produced by this model (p(z) or q(z) in the paper)
         std::map<char, double> seqprobs(){
             std::map<char, double> probs;
-            for(auto iter = y.begin(); iter != y.end(); ++iter){
-                std::string z = seq2str(iter->second);
+            for(auto & iter : y){
+                std::string z = seq2str(iter.second);
                 if(probs.find(z[0]) != probs.end()){
                     probs[z[0]] += 1.0;
                 }else{
@@ -269,11 +216,11 @@ class Model{
 
             std::vector<char> x2;
             std::map<int, int> pos;
-            for(auto iter = y.begin(); iter!= y.end(); ++iter){
-                pos[iter->first] = -1;
+            for(auto & iter : y){
+                pos[iter.first] = -1;
             }
-            for(int n = 0; n < s.size(); n++){
-                sn = s[n];
+            for(int n : s){
+                sn = n;
                 pos[sn] += 1;
                 xn = y[sn][pos[sn]];
                 x2.push_back(xn);
@@ -287,12 +234,12 @@ int main(){
     char curr;
 
     std::fstream newfile;
-    newfile.open("/learn/sequence.txt", std::ios::in);
+    newfile.open("sequence.txt", std::ios::in);
     if(newfile.is_open()){
         std::string tp;
         //trim: https://stackoverflow.com/a/216883/9481613
         while(getline(newfile, tp)){
-            //std::cout << tp << std::endl;
+            std::cout << tp.at(0) << tp[0] << std::endl;
             curr = tp[0];
             x.push_back(curr);
         }

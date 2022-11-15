@@ -1,0 +1,7 @@
+[
+{
+  "directory": "/home/nobu/Documents/ProcessMining/cpp-process-mining/build",
+  "command": "/usr/bin/g++ -I/home/nobu/Documents/ProcessMining/cpp-process-mining/. -g -std=gnu++14 -o CMakeFiles/cpp_process_mining.dir/mimest.cpp.o -c /home/nobu/Documents/ProcessMining/cpp-process-mining/mimest.cpp",
+  "file": "/home/nobu/Documents/ProcessMining/cpp-process-mining/mimest.cpp"
+}
+]

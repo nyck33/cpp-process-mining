@@ -8,8 +8,8 @@
       "args": [],
       "stopAtEntry": false,
       "externalConsole": false,
-      "cwd": "/home/nobu/Documents/ProcessMining/cpp-process-mining/learn",
-      "program": "/home/nobu/Documents/ProcessMining/cpp-process-mining/learn/a.out",
+      "cwd": "/home/nobu/Documents/ProcessMining/cpp-process-mining/",
+      "program": "/home/nobu/Documents/ProcessMining/cpp-process-mining/mimest",
 
       //"program": "/home/nobu/Documents/ProcessMining/cpp-unlabelled-event-logs/build/Debug/outDebug",
       "MIMode": "gdb",

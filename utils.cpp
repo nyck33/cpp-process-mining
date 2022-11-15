@@ -8,12 +8,12 @@ https://www.geeksforgeeks.org/sorting-a-map-by-value-in-c-stl/
 #include <algorithm>
 
 //1.  compare map values and sort map by value
-bool cmp(std::pair<char, double>& a,
+static bool cmp(std::pair<char, double>& a,
 std::pair<char, double>& b){
     return a.second > b.second;
 }
 
-void sortByValue(std::map<char, double>& M){
+static void sortByValue(std::map<char, double>& M){
     std::vector<std::pair<char, double>> A;
 
     //copy key-value pair from map to vector of pairs

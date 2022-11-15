@@ -1,0 +1,3 @@
+/home/nobu/Documents/ProcessMining/cpp-process-mining/build/CMakeFiles/cpp_process_mining.dir
+/home/nobu/Documents/ProcessMining/cpp-process-mining/build/CMakeFiles/edit_cache.dir
+/home/nobu/Documents/ProcessMining/cpp-process-mining/build/CMakeFiles/rebuild_cache.dir

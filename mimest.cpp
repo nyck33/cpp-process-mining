@@ -233,9 +233,15 @@ int main(){
     std::vector<char> x;
     char curr;
 
+    std::string inputFile = "sequence.txt";
     std::fstream newfile;
-    newfile.open("sequence.txt", std::ios::in);
-    if(newfile.is_open()){
+    newfile.open(inputFile, std::ios::in);
+
+    if(!newfile.is_open()){
+        perror("error open");
+        exit(EXIT_FAILURE);
+    }
+    else if(newfile.is_open()){
         std::string tp;
         //trim: https://stackoverflow.com/a/216883/9481613
         while(getline(newfile, tp)){

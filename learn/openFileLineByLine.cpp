@@ -17,7 +17,7 @@ int main(){
         std::string tp;
         while(getline(newfile, tp)){
             std::cout << tp << std::endl;
-            std::cout << tp.size() << std::endl;
+            //std::cout << tp.size() << std::endl;
 
         }
         newfile.close();

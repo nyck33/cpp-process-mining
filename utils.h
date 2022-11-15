@@ -7,6 +7,26 @@
 #include <algorithm>
 #include <set>
 
+//open file, read lines and make vector of symbols
+std::vector<char> openFileAndMakeVector(std::string inputFile){
+    //std::string inputFile = "sequence.txt";
+    std::vector<char> x;
+    std::fstream newfile;
+    newfile.open(inputFile, std::ios::in);
+    if(newfile.is_open()){
+        std::string tp;
+        while(getline(newfile, tp)){
+            std::cout << tp << std::endl;
+            //std::cout << tp.size() << std::endl;
+
+        }
+        newfile.close();
+    }
+
+    return x;
+
+}
+
 //1.  compare map values and sort map by value
 bool cmp(std::pair<char, double>& a, std::pair<char, double>& b){
     return a.second > b.second;

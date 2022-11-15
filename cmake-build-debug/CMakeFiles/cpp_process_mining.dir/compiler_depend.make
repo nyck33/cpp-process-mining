@@ -222,8 +222,31 @@ CMakeFiles/cpp_process_mining.dir/mimest.cpp.o: ../mimest.cpp \
   /usr/include/c++/11/bits/fstream.tcc \
   /usr/include/c++/11/iterator \
   /usr/include/c++/11/bits/stream_iterator.h \
+  /usr/include/c++/11/iomanip \
+  /usr/include/c++/11/locale \
+  /usr/include/c++/11/bits/locale_facets_nonio.h \
+  /usr/include/c++/11/ctime \
+  /usr/include/x86_64-linux-gnu/c++/11/bits/time_members.h \
+  /usr/include/x86_64-linux-gnu/c++/11/bits/messages_members.h \
+  /usr/include/libintl.h \
+  /usr/include/c++/11/bits/locale_facets_nonio.tcc \
+  /usr/include/c++/11/bits/locale_conv.h \
+  /usr/include/c++/11/bits/unique_ptr.h \
+  /usr/include/c++/11/bits/quoted_string.h \
+  /usr/include/c++/11/sstream \
+  /usr/include/c++/11/bits/sstream.tcc \
   ../utils.h
 
+
+/usr/include/c++/11/sstream:
+
+/usr/include/c++/11/bits/locale_conv.h:
+
+/usr/include/x86_64-linux-gnu/c++/11/bits/messages_members.h:
+
+/usr/include/x86_64-linux-gnu/c++/11/bits/time_members.h:
+
+/usr/include/c++/11/bits/locale_facets_nonio.h:
 
 /usr/include/c++/11/bits/fstream.tcc:
 
@@ -265,6 +288,8 @@ CMakeFiles/cpp_process_mining.dir/mimest.cpp.o: ../mimest.cpp \
 
 /usr/include/c++/11/typeinfo:
 
+/usr/include/c++/11/bits/unique_ptr.h:
+
 /usr/include/c++/11/iterator:
 
 /usr/include/c++/11/ostream:
@@ -296,6 +321,8 @@ CMakeFiles/cpp_process_mining.dir/mimest.cpp.o: ../mimest.cpp \
 /usr/include/c++/11/ext/string_conversions.h:
 
 /usr/include/x86_64-linux-gnu/c++/11/bits/atomic_word.h:
+
+/usr/include/c++/11/locale:
 
 /usr/include/linux/errno.h:
 
@@ -405,6 +432,8 @@ CMakeFiles/cpp_process_mining.dir/mimest.cpp.o: ../mimest.cpp \
 
 /usr/include/x86_64-linux-gnu/bits/types/__FILE.h:
 
+/usr/include/c++/11/ctime:
+
 /usr/include/c++/11/bits/codecvt.h:
 
 /usr/include/x86_64-linux-gnu/bits/time64.h:
@@ -446,6 +475,8 @@ CMakeFiles/cpp_process_mining.dir/mimest.cpp.o: ../mimest.cpp \
 /usr/include/x86_64-linux-gnu/bits/fp-logb.h:
 
 /usr/include/c++/11/bits/stl_iterator_base_funcs.h:
+
+/usr/include/c++/11/iomanip:
 
 /usr/include/x86_64-linux-gnu/bits/thread-shared-types.h:
 
@@ -503,6 +534,8 @@ CMakeFiles/cpp_process_mining.dir/mimest.cpp.o: ../mimest.cpp \
 
 /usr/include/c++/11/ext/type_traits.h:
 
+/usr/include/libintl.h:
+
 /usr/include/x86_64-linux-gnu/bits/endianness.h:
 
 /usr/include/c++/11/system_error:
@@ -510,6 +543,8 @@ CMakeFiles/cpp_process_mining.dir/mimest.cpp.o: ../mimest.cpp \
 /usr/include/c++/11/bits/stl_vector.h:
 
 /usr/include/c++/11/bits/erase_if.h:
+
+/usr/include/c++/11/bits/quoted_string.h:
 
 /usr/include/math.h:
 
@@ -541,6 +576,8 @@ CMakeFiles/cpp_process_mining.dir/mimest.cpp.o: ../mimest.cpp \
 
 /usr/include/c++/11/vector:
 
+/usr/include/c++/11/bits/sstream.tcc:
+
 /usr/lib/gcc/x86_64-linux-gnu/11/include/stddef.h:
 
 /usr/include/x86_64-linux-gnu/bits/struct_rwlock.h:
@@ -548,6 +585,8 @@ CMakeFiles/cpp_process_mining.dir/mimest.cpp.o: ../mimest.cpp \
 /usr/include/alloca.h:
 
 /usr/include/c++/11/bits/exception_defines.h:
+
+/usr/include/c++/11/bits/locale_facets_nonio.tcc:
 
 /usr/include/x86_64-linux-gnu/bits/time.h:
 

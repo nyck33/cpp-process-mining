@@ -7,6 +7,7 @@ Use of OpenMP and Cuda to follow
 test with mimgen.py created sequence.text first then try porting
 */
 #include <cmath>
+#include <utility>
 #include <vector>
 #include <map>
 #include <string>
@@ -15,6 +16,9 @@ test with mimgen.py created sequence.text first then try porting
 #include <algorithm>
 #include <fstream>
 #include <iterator>
+#include <cctype>
+#include <iomanip>
+#include <sstream>
 
 #include "utils.h"
 
@@ -30,7 +34,7 @@ class Model{
         std::vector<char> D;
         //global model used to initialize M, (M^{+} in the paper) 
         //# nested {state: {nextstate: prob, nextstate2: prob2,...}}
-	#   //char: {char : double}}
+        //char: {char : double}}
         std::map<char, std::map<char, double>> gM;
         //transition matrix
         std::map<char, std::map<char, double>> M;
@@ -40,9 +44,9 @@ class Model{
         std::map<int, std::vector<char>> y;
 
         Model(std::vector<char> xIn){
-            x = xIn;
+            x = std::move(xIn);
             N = x.size();
-            //build D, set of symbols
+            //todo: build D, set of symbols
             D.push_back(BEGIN);
             //eliminate duplicates and sort vector x
             //https://stackoverflow.com/a/1041939/9481613
@@ -53,42 +57,79 @@ class Model{
                 sortedSetX.insert(x[i]);
             }
             //sort: https://linuxhint.com/sorting-elements-cpp-set/
-            for(std::set<char>::iterator iter = sortedSetX.begin(); iter != sortedSetX.end(); iter++){
-                D.push_back(*iter);
+            for(char iter : sortedSetX){
+                if(std::isalpha(iter)){
+                    D.push_back(iter);
+                }
             }
             D.push_back(END);
-            //init gM to 0.0
+            //todo: init gM to 0.0
             for(auto elementA : D){
                 for(auto elementB : D){
                     gM[elementA][elementB] = 0.0;
                 }
             }
-            //build gM
+            //todo: build gM, each time symbol appears in seq x, +1.0
             int n;
             for(n=0; n < (N-1); ++n){
                 char aChar = x[n];
                 char bChar = x[n+1];
                 gM[aChar][bChar] += 1.0;
             }
-            for(auto iter = gM.begin(); iter!= gM.end(); ++iter){
+            //todo: normailize nested map of gM
+            for(auto & iter : gM){
                 //make sure nestedMap is a reference 
                 //std::map<char,double> &nestedMap = iter->second;
                 //https://www.tutorialspoint.com/differences-between-pass-by-value-and-pass-by-reference-in-cplusplus
-                normalize(iter->second);
+                normalize(iter.second);
             }
         }
 
         void printModel( std::map<char, std::map<char, double>> T){
+            double val, roundedVal;
+            std::string outputStr, blank = "-";
+
+            size_t padSize =5;
             //https://stackoverflow.com/a/15553559/9481613
             std::cout << "Transition Matrix M:" << std::endl;
-            for(auto iter = T.begin(); iter != T.end(); iter++){
-                std::cout << iter->first << ": " << std::endl;
-                std::map<char, double> nestedMap = iter->second;
-                for(auto iter2 = nestedMap.begin(); iter2 != nestedMap.end(); iter2++){
-                    std::cout << iter2->first << ": " << iter2->second << std::endl;
-                }
-
+            //5 spaces
+            outputStr = pad_right(blank, padSize);
+            std::cout << outputStr;
+            //top columns
+            for(auto a : D){
+                outputStr = std::string(1, a);
+                outputStr = pad_right(outputStr, padSize);
+                std::cout << outputStr;
             }
+            std::cout << std::endl;
+            for(auto a: D){
+                outputStr = std::string(1,a);
+                outputStr = pad_right(outputStr, padSize);
+                std::cout << outputStr;
+
+                for(auto b: D){
+                    if(T[a][b] == 0.0){
+                        outputStr = pad_right(blank, padSize);
+                        std::cout << outputStr;
+                    }else{
+                        val = T[a][b];
+                        outputStr = doubleToStringFixedPrecision(val);
+                        outputStr = pad_right(outputStr, padSize);
+                        std::cout << outputStr;
+                    }
+
+                }
+                std::cout << std::endl;
+            }
+            /*
+            for(auto & iter : T){
+                std::cout << iter.first << ": " << std::endl;
+                std::map<char, double> nestedMap = iter.second;
+                for(auto & iter2 : nestedMap){
+                    std::cout << iter2.first << ": " << iter2.second << std::endl;
+                }
+            }
+            */
         }
 
         size_t estimate(){
@@ -114,7 +155,7 @@ class Model{
         void estsources(std::map<char, std::map<char, double>> T){
             double pmax, p, pnext;
             int sn;
-            char xn, b, bnext;
+            char xn, b, bnext, a;
 
             s.clear();
             y.clear();
@@ -126,11 +167,12 @@ class Model{
                 for(auto k: active){
                     for(auto elem : y[k]){
                         if(xn == elem){
+                            //if xn in y[k]
                             continue;
                         }
                     }
                     int vecsize = y[k].size();
-                    char a = y[k][vecsize-1];
+                    a = y[k][vecsize-1];
                     b = xn;
                     p = T[a][b];
                     if(p > pmax){
@@ -147,8 +189,8 @@ class Model{
                 y[sn].push_back(xn);
                 pnext = 0.0;
                 bnext = BEGIN;
-                for(int j = 0; j < D.size(); j++){
-                    b = D[j];
+                for(char j : D){
+                    b = j;
                     if(T[xn][b] > pnext){
                         pnext = T[xn][b];
                         bnext = b;
@@ -161,7 +203,8 @@ class Model{
         }   
 
         void estparams(){
-            char a, b, k;
+            char a, b;
+            int k;
             
             M.clear();
             for(char i : D){
@@ -173,6 +216,7 @@ class Model{
                 }
             }
             for(auto & iter : y){
+                //std::map<int, std::vector<char>> y;
                 k = iter.first;
                 a = BEGIN;
                 b = y[k][0];
@@ -181,31 +225,30 @@ class Model{
                     a = y[k][r];
                     b = y[k][r+1];
                     M[a][b] += 1.0;
-
-
                 }
                 a = y[k][y.size()-1];
                 b = END;
                 M[a][b] += 1.0;
             }
-            for(auto a: D){
-                normalize(M[a]);
+            for(auto aChar: D){
+                normalize(M[aChar]);
             }
         }
         
         //computes the probability distribution for the different sequences produced by this model (p(z) or q(z) in the paper)
-        std::map<char, double> seqprobs(){
-            std::map<char, double> probs;
+        //        std::map<int, std::vector<char>> y;
+        std::map<std::string, double> seqprobs(){
+            std::map<std::string, double> probs;
             for(auto & iter : y){
                 std::string z = seq2str(iter.second);
-                if(probs.find(z[0]) != probs.end()){
-                    probs[z[0]] += 1.0;
+                if(probs.find(z) != probs.end()){
+                    probs[z] += 1.0;
                 }else{
-                    probs[z[0]] = 1.0;
+                    probs[z] = 1.0;
                 }
 
             }
-            normalize(probs);
+            normalizeProbs(probs);
             return probs;
         }
 
@@ -233,8 +276,9 @@ int main(){
     std::vector<char> x;
     char curr;
 
-    //std::string inputFile = "~/Documents/ProcessMining/cpp-process-mining/sequence.txt";
-    std::string inputFile = "sequence.txt";
+    //std::string inputFile = "/home/nobu/Documents/ProcessMining/cpp-process-mining/mocksequence.txt";
+    std::string inputFile = "/home/nobu/Documents/ProcessMining/cpp-process-mining/learn/sequence.txt";
+    //std::string inputFile = "sequence.txt";
     x = openFileAndMakeVector(inputFile);
     std::cout << "symbol sequence: " << seq2str(x) << std::endl;
 
@@ -251,7 +295,7 @@ int main(){
     //print transition mat M
     m.printModel(m.M);
 
-    std::map<char, double> probs = m.seqprobs(); 
+    std::map<std::string, double> probs = m.seqprobs();
 
     sortByValue(probs);
 

@@ -233,24 +233,9 @@ int main(){
     std::vector<char> x;
     char curr;
 
+    //std::string inputFile = "~/Documents/ProcessMining/cpp-process-mining/sequence.txt";
     std::string inputFile = "sequence.txt";
-    std::fstream newfile;
-    newfile.open(inputFile, std::ios::in);
-
-    if(!newfile.is_open()){
-        perror("error open");
-        exit(EXIT_FAILURE);
-    }
-    else if(newfile.is_open()){
-        std::string tp;
-        //trim: https://stackoverflow.com/a/216883/9481613
-        while(getline(newfile, tp)){
-            std::cout << tp.at(0) << tp[0] << std::endl;
-            curr = tp[0];
-            x.push_back(curr);
-        }
-        newfile.close();
-    }
+    x = openFileAndMakeVector(inputFile);
     std::cout << "symbol sequence: " << seq2str(x) << std::endl;
 
     std::cout << x.size() << " symbols" << std::endl;
@@ -262,6 +247,7 @@ int main(){
     size_t K = m.estimate();
 
     bool modelCorrect = m.checkmodel();
+    std::cout << "model is correct: " << modelCorrect << std::endl;
     //print transition mat M
     m.printModel(m.M);
 

@@ -13,7 +13,12 @@ std::vector<char> openFileAndMakeVector(std::string inputFile){
     std::vector<char> x;
     std::fstream newfile;
     newfile.open(inputFile, std::ios::in);
-    if(newfile.is_open()){
+
+    if(!newfile.is_open()){
+        perror("error open");
+        exit(EXIT_FAILURE);
+    }
+    else if(newfile.is_open()){
         std::string tp;
         while(getline(newfile, tp)){
             std::cout << tp << std::endl;

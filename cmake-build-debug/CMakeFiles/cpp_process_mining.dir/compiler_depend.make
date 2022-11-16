@@ -65,14 +65,17 @@ CMakeFiles/cpp_process_mining.dir/mimest.cpp.o: ../mimest.cpp \
   /usr/include/x86_64-linux-gnu/bits/struct_rwlock.h \
   /usr/include/alloca.h \
   /usr/include/x86_64-linux-gnu/bits/stdlib-float.h \
+  /usr/include/c++/11/utility \
+  /usr/include/c++/11/bits/stl_relops.h \
+  /usr/include/c++/11/bits/stl_pair.h \
+  /usr/include/c++/11/bits/move.h \
+  /usr/include/c++/11/type_traits \
+  /usr/include/c++/11/initializer_list \
   /usr/include/c++/11/vector \
   /usr/include/c++/11/bits/stl_algobase.h \
   /usr/include/c++/11/bits/functexcept.h \
   /usr/include/c++/11/bits/exception_defines.h \
   /usr/include/c++/11/ext/numeric_traits.h \
-  /usr/include/c++/11/bits/stl_pair.h \
-  /usr/include/c++/11/bits/move.h \
-  /usr/include/c++/11/type_traits \
   /usr/include/c++/11/bits/stl_iterator_base_types.h \
   /usr/include/c++/11/bits/stl_iterator_base_funcs.h \
   /usr/include/c++/11/bits/concept_check.h \
@@ -92,7 +95,6 @@ CMakeFiles/cpp_process_mining.dir/mimest.cpp.o: ../mimest.cpp \
   /usr/include/c++/11/ext/alloc_traits.h \
   /usr/include/c++/11/bits/alloc_traits.h \
   /usr/include/c++/11/bits/stl_vector.h \
-  /usr/include/c++/11/initializer_list \
   /usr/include/c++/11/bits/stl_bvector.h \
   /usr/include/c++/11/bits/functional_hash.h \
   /usr/include/c++/11/bits/hash_bytes.h \
@@ -105,8 +107,6 @@ CMakeFiles/cpp_process_mining.dir/mimest.cpp.o: ../mimest.cpp \
   /usr/include/c++/11/ext/aligned_buffer.h \
   /usr/include/c++/11/bits/stl_map.h \
   /usr/include/c++/11/tuple \
-  /usr/include/c++/11/utility \
-  /usr/include/c++/11/bits/stl_relops.h \
   /usr/include/c++/11/array \
   /usr/include/c++/11/bits/uses_allocator.h \
   /usr/include/c++/11/bits/invoke.h \
@@ -490,11 +490,11 @@ CMakeFiles/cpp_process_mining.dir/mimest.cpp.o: ../mimest.cpp \
 
 /usr/include/c++/11/bits/stl_bvector.h:
 
-/usr/include/c++/11/ext/numeric_traits.h:
-
 /usr/include/errno.h:
 
 /usr/include/c++/11/utility:
+
+/usr/include/c++/11/ext/numeric_traits.h:
 
 /usr/include/x86_64-linux-gnu/bits/stdint-intn.h:
 
@@ -584,7 +584,11 @@ CMakeFiles/cpp_process_mining.dir/mimest.cpp.o: ../mimest.cpp \
 
 /usr/include/alloca.h:
 
-/usr/include/c++/11/bits/exception_defines.h:
+/usr/include/c++/11/bits/stl_relops.h:
+
+/usr/include/x86_64-linux-gnu/bits/atomic_wide_counter.h:
+
+/usr/include/c++/11/bits/move.h:
 
 /usr/include/c++/11/bits/locale_facets_nonio.tcc:
 
@@ -596,11 +600,7 @@ CMakeFiles/cpp_process_mining.dir/mimest.cpp.o: ../mimest.cpp \
 
 /usr/include/c++/11/bits/stl_function.h:
 
-/usr/include/x86_64-linux-gnu/bits/atomic_wide_counter.h:
-
-/usr/include/c++/11/bits/move.h:
-
-/usr/include/c++/11/bits/stl_relops.h:
+/usr/include/c++/11/bits/exception_defines.h:
 
 /usr/include/c++/11/debug/assertions.h:
 

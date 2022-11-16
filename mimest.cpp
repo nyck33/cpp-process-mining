@@ -86,7 +86,7 @@ class Model{
         }
 
         void printModel( std::map<char, std::map<char, double>> T){
-            double val, roundedVal;
+            double val;
             std::string outputStr, blank = "-";
 
             size_t padSize =5;
@@ -153,17 +153,17 @@ class Model{
         }
 
         void estsources(std::map<char, std::map<char, double>> T){
-            double pmax, p, pnext;
-            int sn;
-            char xn, b, bnext, a;
+           //double pmax, p, pnext;
+           //int sn;
+           // char xn, b, bnext, a;
 
             s.clear();
             y.clear();
             std::set<int> active;
             for(int n=0; n<N; n++){
-                xn = x[n];
-                pmax = 0.0;
-                sn = -1;
+                char xn = x[n];
+                double pmax = 0.0;
+                int sn = -1;
                 for(auto k: active){
                     for(auto elem : y[k]){
                         if(xn == elem){
@@ -172,9 +172,10 @@ class Model{
                         }
                     }
                     int vecsize = y[k].size();
-                    a = y[k][vecsize-1];
-                    b = xn;
-                    p = T[a][b];
+                    // std::map<int, std::vector<char>> y;
+                    char a = y[k][vecsize-1];
+                    char b = xn;
+                    double p = T[a][b];
                     if(p > pmax){
                         sn = k;
                         pmax = p;
@@ -187,10 +188,9 @@ class Model{
                 }
                 s.push_back(sn);
                 y[sn].push_back(xn);
-                pnext = 0.0;
-                bnext = BEGIN;
-                for(char j : D){
-                    b = j;
+                double pnext = 0.0;
+                double bnext = BEGIN;
+                for(char b : D){
                     if(T[xn][b] > pnext){
                         pnext = T[xn][b];
                         bnext = b;
@@ -203,13 +203,13 @@ class Model{
         }   
 
         void estparams(){
+            //        std::map<char, std::map<char, double>> M;
             char a, b;
-            int k;
+            //int k;
             
             M.clear();
-            for(char i : D){
-                a = i;
-                std::map<char, double> nestedMap;
+            for(char a : D){
+                //std::map<char, double> nestedMap;
                 for(char j : D){
                     b = j;
                     M[a][b] = 0.0; 
@@ -217,9 +217,10 @@ class Model{
             }
             for(auto & iter : y){
                 //std::map<int, std::vector<char>> y;
-                k = iter.first;
+                int k = iter.first;
                 a = BEGIN;
                 b = y[k][0];
+                M[a][b] += 1.0;
 
                 for(int r=0; r < (y[k].size() - 1); r++){
                     a = y[k][r];
@@ -276,8 +277,8 @@ int main(){
     std::vector<char> x;
     char curr;
 
-    //std::string inputFile = "/home/nobu/Documents/ProcessMining/cpp-process-mining/mocksequence.txt";
-    std::string inputFile = "/home/nobu/Documents/ProcessMining/cpp-process-mining/learn/sequence.txt";
+    std::string inputFile = "/home/nobu/Documents/ProcessMining/cpp-process-mining/mocksequence.txt";
+    //std::string inputFile = "/home/nobu/Documents/ProcessMining/cpp-process-mining/learn/sequence.txt";
     //std::string inputFile = "sequence.txt";
     x = openFileAndMakeVector(inputFile);
     std::cout << "symbol sequence: " << seq2str(x) << std::endl;

@@ -136,6 +136,44 @@ void printModel(std::map<char, std::map<char, double>> T, std::vector<char> D) {
     */
 }
 
+//computes the probability distribution for the different sequences produced by this model (p(z) or q(z) in the paper)
+//        std::map<int, std::vector<char>> y;
+std::map<std::string, double> seqprobs(const std::map<int, std::vector<char>>& y){
+    std::map<std::string, double> probs;
+    for(auto & iter : y){
+        std::string z = seq2str(iter.second);
+        if(probs.find(z) != probs.end()){
+            probs[z] += 1.0;
+        }else{
+            probs[z] = 1.0;
+        }
+
+    }
+    normalizeProbs(probs);
+    return probs;
+}
+
+//checks that it is possible to recover the symbol sequence x from the separate sequences y (sanity check)
+bool checkmodel(const std::vector<char>& x,
+                std::map<int, std::vector<char>> y,
+                std::vector<int> s){
+    int sn;
+    char xn;
+
+    std::vector<char> x2;
+    std::map<unsigned long, int> pos;
+    for(auto & iter : y){
+        pos[iter.first] = -1;
+    }
+    for(int n : s){
+        sn = n;
+        pos[sn] += 1;
+        xn = y[sn][pos[sn]];
+        x2.push_back(xn);
+    }
+    return (x2 == x);
+}
+
 sourcesRetStruct estsources(std::vector<char> x,
                             std::vector<char> D,
                             size_t N,
@@ -148,19 +186,19 @@ sourcesRetStruct estsources(std::vector<char> x,
 
     std::vector<int> s;
     std::map<int, std::vector<char>> y;
-    std::set<size_t> active;
+    std::set<int> active;
     for (int n = 0; n < N; n++) {
         char xn = x[n];
         double pmax = 0.0;
-        size_t sn = -1;
-        for (auto k: active) {
+        long sn = -1;
+        for (int k: active) {
             for (auto elem: y[k]) {
                 if (xn == elem) {
                     //if xn in y[k]
                     continue;
                 }
             }
-            size_t vecsize = y[k].size();
+            int vecsize = y[k].size();
             // std::map<int, std::vector<char>> y;
             char a = y[k][vecsize - 1];
             char b = xn;
@@ -178,15 +216,15 @@ sourcesRetStruct estsources(std::vector<char> x,
         s.push_back(sn);
         y[sn].push_back(xn);
         double pnext = 0.0;
-        double bnext = BEGIN;
+        char bnext = BEGIN;
         for (char b: D) {
             if (T[xn][b] > pnext) {
                 pnext = T[xn][b];
                 bnext = b;
             }
-            if (bnext == END) {
-                active.erase(sn);
-            }
+        }
+        if (bnext == END) {
+            active.erase(sn);
         }
     }
     retVals.s = s;
@@ -195,6 +233,7 @@ sourcesRetStruct estsources(std::vector<char> x,
     return retVals;
 }
 
+//return M
 std::map<char, std::map<char, double>> estparams(
         const std::vector<char>& D,
         std::map<int, std::vector<char>> y) {
@@ -226,11 +265,11 @@ std::map<char, std::map<char, double>> estparams(
         M[a][b] += 1.0;
     }
     for (auto aChar: D) {
-        normalize(M[aChar]);
+        M[aChar] = normalize(M[aChar]);
     }
     return M;
 }
-
+//estimate(x,s,gM, M, D, N);
 estimateRetVal estimate(const std::vector<char>& x,
                         std::vector<int> s,
                         std::map<char, std::map<char, double>> gM,
@@ -241,12 +280,19 @@ estimateRetVal estimate(const std::vector<char>& x,
     std::vector<std::vector<int>> prevsseqs;
     std::cout << "Initializing source sequence..." << std::endl;
     sourcesRetStruct srcsSY = estsources(x, D, N, std::move(gM));
+    s = srcsSY.s;
+    y = srcsSY.y;
     int its = 0;
     //compare s to each vector in vector of vectors prevsseqs
-    while (!compareSToPrevSeqs(s, prevsseqs)) {
+    bool done = false;
+    while (true) {
+        done = compareSToPrevSeqs(s, prevsseqs);
+        if(done){
+            break;
+        }
         its += 1;
         std::cout << "# " << its << ": Estimating parameters..." << std::endl;
-        M = estparams(D, y);
+        M = estparams(D,y);
         prevsseqs.push_back(s);
         std::cout << "# " << its << ": Computing source sequence..." << std::endl;
         srcsSY = estsources(x, D, N, M);
@@ -262,51 +308,13 @@ estimateRetVal estimate(const std::vector<char>& x,
 
 }
 
-//computes the probability distribution for the different sequences produced by this model (p(z) or q(z) in the paper)
-//        std::map<int, std::vector<char>> y;
-std::map<std::string, double> seqprobs(const std::map<int, std::vector<char>>& y){
-    std::map<std::string, double> probs;
-    for(auto & iter : y){
-        std::string z = seq2str(iter.second);
-        if(probs.find(z) != probs.end()){
-            probs[z] += 1.0;
-        }else{
-            probs[z] = 1.0;
-        }
-
-    }
-    normalizeProbs(probs);
-    return probs;
-}
-
-//checks that it is possible to recover the symbol sequence x from the separate sequences y (sanity check)
-bool checkmodel(const std::vector<char>& x, std::map<int, std::vector<char>> y, std::vector<int> s){
-    int sn;
-    char xn;
-
-    std::vector<char> x2;
-    std::map<int, int> pos;
-    for(auto & iter : y){
-        pos[iter.first] = -1;
-    }
-    for(int n : s){
-        sn = n;
-        pos[sn] += 1;
-        xn = y[sn][pos[sn]];
-        x2.push_back(xn);
-    }
-    return (x2 == x);
-}
-
-
 int main(){
     char curr;
     //symbol sequence
     std::vector<char> x;
 
-    //std::string inputFile = "/home/nobu/Documents/ProcessMining/cpp-process-mining/mocksequence.txt";
-    std::string inputFile = "/home/nobu/Documents/ProcessMining/cpp-process-mining/learn/sequence.txt";
-    //std::string inputFile = "sequence.txt";
+    std::string inputFile = "/home/nobu/Documents/ProcessMining/cpp-process-mining/mocksequence.txt";
+    //std::string inputFile = "/home/nobu/Documents/ProcessMining/cpp-process-mining/learn/sequence.txt";
     x = openFileAndMakeVector(inputFile);
 
     std::cout << "symbol sequence: " << seq2str(x) << std::endl;

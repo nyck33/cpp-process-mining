@@ -29,7 +29,7 @@ static std::map<std::string, double> normalizeProbs(std::map<std::string, double
     return probs;
 }
 
-static std::map<char, double> normalize(std::map<char, double> &gmNestedMap){
+static std::map<char, double> _normalize(std::map<char, double> &gmNestedMap){
     //todo: need new instance of map to return for immutable
     double rowsum = 0.0;
     for(auto & iter : gmNestedMap){
@@ -49,6 +49,21 @@ static std::map<char, double> normalize(std::map<char, double> &gmNestedMap){
 
     return gmNestedMap;
 }
+
+static std::map<char,double> normalize(std::map<char, double> &gmNestedMap){
+    double rowsum = 0.0;
+    for(const auto& [ key, value] : gmNestedMap){
+        rowsum += value;
+    }
+    if(rowsum > 0.0){
+        for(auto& [key,value]: gmNestedMap){
+            value /= rowsum;
+        }
+    }
+
+    return gmNestedMap;
+}
+
 
 static std::string seq2str(std::vector<char> seq){
     std::string str = "";

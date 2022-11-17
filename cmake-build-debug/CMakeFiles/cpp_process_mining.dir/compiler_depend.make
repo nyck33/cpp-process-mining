@@ -235,8 +235,11 @@ CMakeFiles/cpp_process_mining.dir/mimest.cpp.o: ../mimest.cpp \
   /usr/include/c++/11/bits/quoted_string.h \
   /usr/include/c++/11/sstream \
   /usr/include/c++/11/bits/sstream.tcc \
-  ../utils.h
+  ../utils.h \
+  ../mimest.h
 
+
+../mimest.h:
 
 /usr/include/c++/11/sstream:
 

@@ -35,22 +35,21 @@ std::vector<char> initializeD(std::vector<char> x) {
     unsigned size = x.size();
     //eliminate duplicates
     for (unsigned i = 0; i < size; ++i) {
-        for (unsigned i = 0; i < size; ++i) {
-            sortedSetX.insert(x[i]);
-        }
-        //sort: https://linuxhint.com/sorting-elements-cpp-set/
-        for (char iter: sortedSetX) {
-            if (std::isalpha(iter)) {
-                D.push_back(iter);
-            }
-        }
-        D.push_back(END);
-
-        return D;
+        sortedSetX.insert(x[i]);
     }
+    //sort: https://linuxhint.com/sorting-elements-cpp-set/
+    for (char iter: sortedSetX) {
+        if (std::isalpha(iter)) {
+            D.push_back(iter);
+        }
+    }
+    D.push_back(END);
+
+    return D;
 }
 
-std::map<char, std::map<char, double>> initializeGM(std::vector<char> D) {
+
+std::map<char, std::map<char, double>> initializeGM(const std::vector<char>& D) {
     std::map<char, std::map<char, double>> gM;
     //todo: init gM to 0.0
     for (auto elementA: D) {
@@ -197,7 +196,7 @@ sourcesRetStruct estsources(std::vector<char> x,
 }
 
 std::map<char, std::map<char, double>> estparams(
-        std::vector<char> D,
+        const std::vector<char>& D,
         std::map<int, std::vector<char>> y) {
     //std::map<char, std::map<char, double>> M;
     //int k;
@@ -232,11 +231,11 @@ std::map<char, std::map<char, double>> estparams(
     return M;
 }
 
-estimateRetVal estimate(std::vector<char> x,
+estimateRetVal estimate(const std::vector<char>& x,
                         std::vector<int> s,
                         std::map<char, std::map<char, double>> gM,
                         std::map<char, std::map<char, double>> M,
-                        std::vector<char> D,
+                        const std::vector<char>& D,
                         std::map<int, std::vector<char>> y,
                         size_t N) {
     std::vector<std::vector<int>> prevsseqs;
@@ -265,7 +264,7 @@ estimateRetVal estimate(std::vector<char> x,
 
 //computes the probability distribution for the different sequences produced by this model (p(z) or q(z) in the paper)
 //        std::map<int, std::vector<char>> y;
-std::map<std::string, double> seqprobs(std::map<int, std::vector<char>> y){
+std::map<std::string, double> seqprobs(const std::map<int, std::vector<char>>& y){
     std::map<std::string, double> probs;
     for(auto & iter : y){
         std::string z = seq2str(iter.second);
@@ -281,7 +280,7 @@ std::map<std::string, double> seqprobs(std::map<int, std::vector<char>> y){
 }
 
 //checks that it is possible to recover the symbol sequence x from the separate sequences y (sanity check)
-bool checkmodel(std::vector<char> x, std::map<int, std::vector<char>> y, std::vector<int> s){
+bool checkmodel(const std::vector<char>& x, std::map<int, std::vector<char>> y, std::vector<int> s){
     int sn;
     char xn;
 
@@ -304,8 +303,18 @@ int main(){
     char curr;
     //symbol sequence
     std::vector<char> x;
-    //len of x
-    size_t N= 0;
+
+    //std::string inputFile = "/home/nobu/Documents/ProcessMining/cpp-process-mining/mocksequence.txt";
+    std::string inputFile = "/home/nobu/Documents/ProcessMining/cpp-process-mining/learn/sequence.txt";
+    //std::string inputFile = "sequence.txt";
+    x = openFileAndMakeVector(inputFile);
+
+    std::cout << "symbol sequence: " << seq2str(x) << std::endl;
+
+    std::cout << x.size() << " symbols" << std::endl;
+
+    size_t N = x.size();
+
     //set of symbols in x
     std::vector<char> D;
     //global model used to initialize M, (M^{+} in the paper)
@@ -319,14 +328,12 @@ int main(){
     //separate source sequences (y^{(k)} in the paper)
     std::map<int, std::vector<char>> y;
 
-    std::string inputFile = "/home/nobu/Documents/ProcessMining/cpp-process-mining/mocksequence.txt";
-    //std::string inputFile = "/home/nobu/Documents/ProcessMining/cpp-process-mining/learn/sequence.txt";
-    //std::string inputFile = "sequence.txt";
-    x = openFileAndMakeVector(inputFile);
-    N = x.size();
-    std::cout << "symbol sequence: " << seq2str(x) << std::endl;
-
-    std::cout << x.size() << " symbols" << std::endl;
+    /////////////////////////////////////////////////
+    //////call init funcs
+    D = initializeD(x);
+    gM = initializeGM(D);
+    gM = buildGM(x, gM, N);
+    gM = normalizeGM(D, gM);
 
     //estimate model
     estimateRetVal retVal = estimate(x,s,gM, M, D, y, N);
@@ -334,7 +341,7 @@ int main(){
     M = retVal.M;
 
     bool modelCorrect = checkmodel(x, y, s);
-    //std::cout << "model is correct: " << modelCorrect << std::endl;
+    std::cout << "model is correct: " << modelCorrect << std::endl;
     //print transition mat M
     printModel(M, D);
 

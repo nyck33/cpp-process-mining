@@ -208,7 +208,8 @@ sourcesRetStruct estsources(std::vector<char> x,
                 pmax = p;
             }
         }
-        if ((sn == -1) || (T[BEGIN][xn] > pmax)) {
+        double TBeginXn = T[BEGIN][xn];
+        if ((sn == -1) || (TBeginXn > pmax)) {
             sn = y.size() + 1;
             active.insert(sn);
             y[sn].clear();
@@ -218,7 +219,8 @@ sourcesRetStruct estsources(std::vector<char> x,
         double pnext = 0.0;
         char bnext = BEGIN;
         for (char b: D) {
-            if (T[xn][b] > pnext) {
+            double Txnb = T[xn][b];
+            if (Txnb > pnext) {
                 pnext = T[xn][b];
                 bnext = b;
             }

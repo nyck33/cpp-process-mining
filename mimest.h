@@ -343,26 +343,8 @@ std::vector<std::vector<double>> estparams(
 
     return M;
 }
-    /*
-    for (int k = 0; k < y.size(); k++) {
-        //std::map<int, std::vector<char>> y;
-        int a = BEGIN;
-        int b = y[k].at(0);
-        M[a][b] += 1.0;
 
-        for (int r = 0; r < (y[k].size() - 1); r++) {
-            a = y[k][r];
-            b = y[k][r + 1];
-            M[a][b] += 1.0;
-        }
-        a = y[k][y.size() - 1];
-        b = END;
-        M[a][b] += 1.0;
-    }
-    M = normalizeGM(M);
-    return M;
-}
-     */
+
 //estimate(x,s,gM, M, D, N);
 estimateRetVal estimate(std::vector<int>& x,
                         std::vector<int> s,

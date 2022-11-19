@@ -89,7 +89,7 @@ int main(){
     for(int i=0; i<y.size(); i++){
         std::vector<char> subarr;
         for(int j=0; j < y[i].size(); j++){
-            subarr.push_back(revDDict[y[i][j]]);
+            subarr.push_back(revDDict[y[i].at(j)]);
         }
         charY[i] = subarr;
     }

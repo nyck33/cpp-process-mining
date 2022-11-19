@@ -56,31 +56,48 @@ int main(){
     std::vector<std::vector<double>> gM = initializeGM(intsD);
 
     gM = buildGM(intsX, gM, N);
-    gM = normalizeGM(intsD, gM);
+    gM = normalizeGM(gM);
+
+    size_t numRows = gM.size();
+    size_t numCols = gM[0].size();
 
     //transition matrix
-    std::vector<std::vector<double>> M;
+    std::vector<std::vector<double>> M = initializeGM(intsD);
     //src sequence TBD
     std::vector<int> s;
     //separate source sequences (y^{(k)} in the paper)
-    std::map<int, std::vector<char>> y;
+    //each nested vec can differ in size
+    std::map<int, std::vector<int>> y;
+
+    //redefine begin and end with ints
+    int BEGINInt = dDict[BEGIN];
+    int ENDInt = dDict[END];
     /////////////////////////////////////////////////
     //////call init funcs
 
-
-
-
     //estimate model
-    estimateRetVal retVal = estimate(x,s,gM, M, D, y, N);
+    estimateRetVal retVal = estimate(intsX,s,gM, M, intsD, y, N, BEGINInt, ENDInt);
     size_t K = retVal.K;
     M = retVal.M;
 
-    bool modelCorrect = checkmodel(x, y, s);
-    std::cout << "model is correct: " << modelCorrect << std::endl;
-    //print transition mat M
-    printModel(M, D);
+    //translate y back to chars from int
+    std::map<int, std::vector<char>> charY;
 
-    std::map<std::string, double> probs = seqprobs(y);
+    for (const auto& [keyInt, intVec]: y){
+        std::vector<char> subarr;
+        for (auto num: intVec){
+            subarr.push_back(revDDict[num]);
+        }
+        charY[keyInt] = subarr;
+        subarr.clear();
+    }
+
+    //bool modelCorrect = checkmodel(intsX, y, s);
+    //std::cout << "model is correct: " << modelCorrect << std::endl;
+    //print transition mat M
+    printModel(M, D, dDict);
+
+    std::map<std::string, double> probs = seqprobs(charY);
 
     sortByValue(probs);
 

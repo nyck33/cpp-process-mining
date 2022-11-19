@@ -21,13 +21,14 @@
 
 struct sourcesRetStruct{
     std::vector<int> s;
-    std::map<int, std::vector<char>> y;
+    std::map<int, std::vector<int>> y;
+
 
 };
 
 struct estimateRetVal{
     size_t K{};
-    std::map<char, std::map<char, double>> M;
+    std::vector<std::vector<double>> M;
 
 };
 
@@ -86,13 +87,16 @@ std::vector<char> initializeD(std::vector<char> x, char begin, char end) {
 
 std::vector<std::vector<double>> initializeGM(std::vector<int>& D) {
     std::vector<std::vector<double>> gM;
+    std::vector<double> innerVec;
 
-    //todo: init gM to 0.0
-    for (auto elementA: D) {
-        for (auto elementB: D) {
-            gM.at(elementA).at(elementB) = 0.0;
-        }
+    for(auto a: D){
+        innerVec.push_back(0.0);
     }
+
+    for(auto b: D){
+        gM.push_back(innerVec);
+    }
+
     return gM;
 }
 
@@ -112,8 +116,7 @@ std::vector<std::vector<double>> buildGM(std::vector<int> x,
     return gM;
 }
 
-std::vector<std::vector<double>> normalizeGM(const std::vector<int>& D,
-                                                   std::vector<std::vector<double>> &gM) {
+std::vector<std::vector<double>> normalizeGM(std::vector<std::vector<double>> &gM) {
     double rowsum;
     std::vector<double> rowsumsVec;
 
@@ -133,7 +136,8 @@ std::vector<std::vector<double>> normalizeGM(const std::vector<int>& D,
 
 }
 
-void printModel(std::map<char, std::map<char, double>> T, std::vector<char> D) {
+void printModel(std::vector<std::vector<double>> T, std::vector<char> D,
+                std::map<char, int> Ddict) {
     double val;
     std::string outputStr, blank = "-";
 
@@ -150,17 +154,21 @@ void printModel(std::map<char, std::map<char, double>> T, std::vector<char> D) {
         std::cout << outputStr;
     }
     std::cout << std::endl;
+    //very left row names
     for (auto a: D) {
         outputStr = std::string(1, a);
         outputStr = pad_right(outputStr, padSize);
         std::cout << outputStr;
-
+        //columns
         for (auto b: D) {
-            if (T[a][b] == 0.0) {
+            int aIdx, bIdx;
+            aIdx = Ddict[a];
+            bIdx = Ddict[b];
+            if (T.at(aIdx).at(bIdx) == 0.0) {
                 outputStr = pad_right(blank, padSize);
                 std::cout << outputStr;
             } else {
-                val = T[a][b];
+                val = T.at(aIdx).at(bIdx);
                 outputStr = doubleToStringFixedPrecision(val);
                 outputStr = pad_right(outputStr, padSize);
                 std::cout << outputStr;
@@ -182,10 +190,10 @@ void printModel(std::map<char, std::map<char, double>> T, std::vector<char> D) {
 
 //computes the probability distribution for the different sequences produced by this model (p(z) or q(z) in the paper)
 //        std::map<int, std::vector<char>> y;
-std::map<std::string, double> seqprobs(const std::map<int, std::vector<char>>& y){
+std::map<std::string, double> seqprobs(std::map<int, std::vector<char>> y){
     std::map<std::string, double> probs;
-    for(auto & iter : y){
-        std::string z = seq2str(iter.second);
+    for(auto & [intsKey, intsArr] : y){
+        std::string z = seq2str(intsArr);
         if(probs.find(z) != probs.end()){
             probs[z] += 1.0;
         }else{
@@ -218,10 +226,10 @@ bool checkmodel(const std::vector<char>& x,
     return (x2 == x);
 }
 
-sourcesRetStruct estsources(std::vector<char> x,
-                            std::vector<char> D,
+sourcesRetStruct estsources(std::vector<int> x,
+                            const std::vector<int>& D,
                             size_t N,
-                            std::map<char, std::map<char, double>> T) {
+                            std::vector<std::vector<double>> T, int BEGIN, int END) {
     //double pmax, p, pnext;
     //int sn;
     // char xn, b, bnext, a;
@@ -229,23 +237,29 @@ sourcesRetStruct estsources(std::vector<char> x,
     sourcesRetStruct retVals;
 
     std::vector<int> s;
-    std::map<int, std::vector<char>> y;
+    std::map<int, std::vector<int>> y;
     std::set<int> active;
+    bool xnInYk = false;
     for (int n = 0; n < N; n++) {
-        char xn = x[n];
+        int xn = x[n];
         double pmax = 0.0;
-        long sn = -1;
+        int sn = -1;
         for (int k: active) {
             for (auto elem: y[k]) {
                 if (xn == elem) {
                     //if xn in y[k]
-                    continue;
+                    xnInYk = true;
+                    break;
                 }
+            }
+            if(xnInYk){
+                xnInYk = false;
+                continue;
             }
             int vecsize = y[k].size();
             // std::map<int, std::vector<char>> y;
-            char a = y[k][vecsize - 1];
-            char b = xn;
+            int a = y[k][vecsize - 1];
+            int b = xn;
             double p = T[a][b];
             if (p > pmax) {
                 sn = k;
@@ -256,13 +270,15 @@ sourcesRetStruct estsources(std::vector<char> x,
         if ((sn == -1) || (TBeginXn > pmax)) {
             sn = y.size() + 1;
             active.insert(sn);
-            y[sn].clear();
+            if(!y[sn].empty()){
+                y[sn].clear();
+            }
         }
         s.push_back(sn);
         y[sn].push_back(xn);
         double pnext = 0.0;
-        char bnext = BEGIN;
-        for (char b: D) {
+        int bnext = BEGIN;
+        for (int b: D) {
             double Txnb = T[xn][b];
             if (Txnb > pnext) {
                 pnext = T[xn][b];
@@ -280,25 +296,18 @@ sourcesRetStruct estsources(std::vector<char> x,
 }
 
 //return M
-std::map<char, std::map<char, double>> estparams(
-        const std::vector<char>& D,
-        std::map<int, std::vector<char>> y) {
+std::vector<std::vector<double>> estparams(
+        std::vector<int>& D,
+        std::map<int, std::vector<int>> y, int BEGIN, int END) {
     //std::map<char, std::map<char, double>> M;
     //int k;
 
-    std::map<char, std::map<char, double>> M;
-    for (char a: D) {
-        //std::map<char, double> nestedMap;
-        for (char b: D) {
+    std::vector<std::vector<double>> M = initializeGM(D);
 
-            M[a][b] = 0.0;
-        }
-    }
-    for (auto &iter: y) {
+    for (int k = 0; k < y.size(); k++) {
         //std::map<int, std::vector<char>> y;
-        int k = iter.first;
-        char a = BEGIN;
-        char b = y[k][0];
+        int a = BEGIN;
+        int b = y[k].at(0);
         M[a][b] += 1.0;
 
         for (int r = 0; r < (y[k].size() - 1); r++) {
@@ -310,22 +319,20 @@ std::map<char, std::map<char, double>> estparams(
         b = END;
         M[a][b] += 1.0;
     }
-    for (auto aChar: D) {
-        M[aChar] = normalize(M[aChar]);
-    }
+    M = normalizeGM(M);
     return M;
 }
 //estimate(x,s,gM, M, D, N);
-estimateRetVal estimate(const std::vector<char>& x,
+estimateRetVal estimate(std::vector<int>& x,
                         std::vector<int> s,
-                        std::map<char, std::map<char, double>> gM,
-                        std::map<char, std::map<char, double>> M,
-                        const std::vector<char>& D,
-                        std::map<int, std::vector<char>> y,
-                        size_t N) {
+                        std::vector<std::vector<double>>& gM,
+                        std::vector<std::vector<double>> M,
+                        std::vector<int>& D,
+                        std::map<int, std::vector<int>> y,
+                        size_t N, int BEGIN, int END) {
     std::vector<std::vector<int>> prevsseqs;
     std::cout << "Initializing source sequence..." << std::endl;
-    sourcesRetStruct srcsSY = estsources(x, D, N, std::move(gM));
+    sourcesRetStruct srcsSY = estsources(x, D, N, gM, BEGIN, END);
     s = srcsSY.s;
     y = srcsSY.y;
     int its = 0;
@@ -338,10 +345,10 @@ estimateRetVal estimate(const std::vector<char>& x,
         }
         its += 1;
         std::cout << "# " << its << ": Estimating parameters..." << std::endl;
-        M = estparams(D,y);
+        M = estparams(D,y, BEGIN, END);
         prevsseqs.push_back(s);
         std::cout << "# " << its << ": Computing source sequence..." << std::endl;
-        srcsSY = estsources(x, D, N, M);
+        srcsSY = estsources(x, D, N, M, BEGIN, END);
         y = srcsSY.y;
         s = srcsSY.s;
 

@@ -65,8 +65,8 @@ static std::map<char,double> normalize(std::map<char, double> &gmNestedMap){
 }
 
 
-static std::string seq2str(std::vector<char> seq){
-    std::string str = "";
+static std::string seq2str(const std::vector<char>& seq){
+    std::string str;
     for(auto elem : seq){
         str += elem;
     }
@@ -97,7 +97,7 @@ void sortByValue(std::map<std::string, double>& M){
 
 
 //open file, read lines and make vector of symbols
-std::vector<char> openFileAndMakeVector(std::string inputFile){
+std::vector<char> openFileAndMakeVector(const std::string& inputFile){
     //todo: make x from file
     //std::string inputFile = "sequence.txt";
     std::vector<char> x;

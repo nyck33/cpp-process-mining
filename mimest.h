@@ -22,7 +22,7 @@
 
 struct sourcesRetStruct{
     std::vector<int> s;
-    std::map<int, std::vector<int>> y;
+    std::vector<std::vector<int>> y;
 
 
 };
@@ -30,7 +30,7 @@ struct sourcesRetStruct{
 struct estimateRetVal{
     size_t K{};
     std::vector<std::vector<double>> M;
-    std::map<int, std::vector<int>> intsY;
+    std::vector<std::vector<int>> intsY;
 
 
 };
@@ -42,12 +42,13 @@ struct DdictStruct{
 };
 
 std::vector<int> translateXToInts(const std::vector<char>& x, std::map<char, int>& dDict){
-    std::vector<int> intsX;
+    std::vector<int> intsX(x.size(), 0);
 
     #pragma omp parallel for
     for(int i=0; i<x.size(); i++){
         char a = x[i];
-        intsX.push_back(dDict[a]);
+        //intsX.push_back(dDict[a]);
+        intsX[i] = dDict[a];
     }
 
     return intsX;
@@ -76,37 +77,39 @@ std::vector<char> initializeD(std::vector<char> x, char begin, char end) {
     //eliminate duplicates and sort vector x
     //https://stackoverflow.com/a/1041939/9481613
     std::set<char> sortedSetX;
+    //std::vector<char> sortedSetX;
     unsigned size = x.size();
     //eliminate duplicates
-    #pragma omp parallel for
     for (unsigned i = 0; i < size; ++i) {
         sortedSetX.insert(x[i]);
     }
     //sort: https://linuxhint.com/sorting-elements-cpp-set/
-    #pragma omp parallel for
-    for (char iter: sortedSetX) {
-        if (std::isalpha(iter)) {
-            D.push_back(iter);
+    for(char symbol: sortedSetX){
+        if(std::isalpha(symbol)){
+            D.push_back(symbol);
         }
     }
+
     D.push_back(end);
 
     return D;
 }
 
 std::vector<std::vector<double>> initializeGM(std::vector<int>& D) {
-    std::vector<std::vector<double>> gM;
-    std::vector<double> innerVec;
+    std::vector<double> innerVec(D.size(), 0.0);
+    std::vector<std::vector<double>> gM(D.size(), innerVec);
 
+    /*
     #pragma omp parallel for
-    for(auto a: D){
+    for(int i=0; i< D.size(); i++){
         innerVec.push_back(0.0);
     }
 
     #pragma omp parallel for
-    for(auto b: D){
+    for(int j =0; j< D.size(); j++){
         gM.push_back(innerVec);
     }
+    */
 
     return gM;
 }
@@ -118,7 +121,7 @@ std::vector<std::vector<double>> buildGM(std::vector<int> x,
     int a, b;
     //std::map<char, std::map<char, double>> newGM;
     #pragma omp parallel for
-    for (int n = 0; n < N - 1; n++) {
+    for (int n = 0; n < (N - 1); n++) {
         a = x.at(n);
         b = x[n + 1];
         gM.at(a).at(b) += 1.0;
@@ -132,17 +135,18 @@ std::vector<std::vector<double>> normalizeGM(std::vector<std::vector<double>> &g
     std::vector<double> rowsumsVec;
 
     #pragma omp parallel for
-    for (auto &vec: gM) {
-        for(auto &b: vec){
-            rowsum += b;
+    for(int i=0; i<gM.size(); i++){
+        for(int j=0; j< gM[i].size(); j++){
+            rowsum += gM[i][j];
         }
         if(rowsum > 0){
-            for(auto &c: vec){
-                c /= rowsum;
+            for(int k=0; k< gM[i].size(); k++){
+                gM[i][k] /= rowsum;
             }
         }
         rowsum = 0;
     }
+
 
     return gM;
 
@@ -160,7 +164,6 @@ void printModel(std::vector<std::vector<double>> T, std::vector<char> D,
     outputStr = pad_right(blank, padSize);
     std::cout << outputStr;
     //top columns
-    #pragma omp parallel for
     for (auto a: D) {
         outputStr = std::string(1, a);
         outputStr = pad_right(outputStr, padSize);
@@ -168,7 +171,6 @@ void printModel(std::vector<std::vector<double>> T, std::vector<char> D,
     }
     std::cout << std::endl;
     //very left row names
-    #pragma omp parallel for
     for (auto a: D) {
         outputStr = std::string(1, a);
         outputStr = pad_right(outputStr, padSize);
@@ -204,19 +206,19 @@ void printModel(std::vector<std::vector<double>> T, std::vector<char> D,
 
 //computes the probability distribution for the different sequences produced by this model (p(z) or q(z) in the paper)
 //        std::map<int, std::vector<char>> y;
-std::map<std::string, double> seqprobs(std::map<int, std::vector<char>> &y){
+std::map<std::string, double> seqprobs(std::vector<std::vector<char>> &y){
     std::map<std::string, double> probs;
 
     #pragma omp parallel for
-    for(auto & [intsKey, intsArr] : y){
-        std::string z = seq2str(intsArr);
+    for(int i =0; i< y.size(); i++){
+        std::string z = seq2str(y[i]);
         if(probs.find(z) != probs.end()){
             probs[z] += 1.0;
         }else{
             probs[z] = 1.0;
         }
-
     }
+
     normalizeProbs(probs);
     return probs;
 }
@@ -242,6 +244,27 @@ bool checkmodel(const std::vector<char>& x,
     return (x2 == x);
 }
 
+//helper to remove empty nested vectors from y
+bool isEmpty(std::vector<int> subarrY){
+    return subarrY.empty();
+}
+
+//helper to find sn in active
+bool isInActive(int sn, std::vector<int> active){
+    int inCount=0;
+
+    #pragma omp parallel for
+    for(int i=0; i< active.size(); i++){
+        if(active[i] == sn){
+            inCount++;
+        }
+    }
+    if(inCount > 0){
+        return true;
+    }
+    return false;
+}
+
 sourcesRetStruct estsources(std::vector<int> x,
                             const std::vector<int>& D,
                             size_t N,
@@ -249,26 +272,30 @@ sourcesRetStruct estsources(std::vector<int> x,
     //double pmax, p, pnext;
     //int sn;
     // char xn, b, bnext, a;
+    std::vector<int>::iterator itr;
 
     sourcesRetStruct retVals;
 
     std::vector<int> s;
-    std::map<int, std::vector<int>> y;
-    std::set<int> active;
+    std::vector<std::vector<int>> y;
+    std::vector<int> emptyVec;
+    //std::set<int> active;
+    std::vector<int> active;
     bool xnInYk = false;
 
-    #pragma omp parallel for
+    //#pragma omp parallel for
     for (int n = 0; n < N; n++) {
         int xn = x[n];
         double pmax = 0.0;
         int sn = -1;
-        for (int k: active) {
-            for (auto elem: y[k]) {
-                if (xn == elem) {
-                    //if xn in y[k]
+
+        for(int k =0; k<active.size(); k++){
+            for(int elem= 0; elem < y[k].size(); elem++){
+                if(xn == y[k][elem]){
                     xnInYk = true;
                     break;
                 }
+
             }
             if(xnInYk){
                 xnInYk = false;
@@ -286,17 +313,27 @@ sourcesRetStruct estsources(std::vector<int> x,
         }
         double TBeginXn = T[BEGIN][xn];
         if ((sn == -1) || (TBeginXn > pmax)) {
-            sn = y.size() + 1;
-            active.insert(sn);
-            if(!y[sn].empty()){
-                y[sn].clear();
+            if(y.empty()){
+                sn = y.size() + 1;
+            }else{
+                sn = y.size();
+            }
+            if(isInActive(sn, active)==false){
+                active.push_back(sn);
+
+            }
+            if (sn == 1){
+                y.push_back(emptyVec);
+                y.push_back(emptyVec);
+            }else{
+                y.push_back(emptyVec);
             }
         }
         s.push_back(sn);
         y[sn].push_back(xn);
         double pnext = 0.0;
         int bnext = BEGIN;
-        for (int b: D) {
+        for(int b=0; b<D.size(); b++ ){
             double Txnb = T[xn][b];
             if (Txnb > pnext) {
                 pnext = T[xn][b];
@@ -304,11 +341,16 @@ sourcesRetStruct estsources(std::vector<int> x,
             }
         }
         if (bnext == END) {
-            active.erase(sn);
+            itr = remove(active.begin(), active.end(), sn);
+
         }
     }
     retVals.s = s;
     retVals.y = y;
+
+    //https://iq.opengenus.org/ways-to-remove-elements-from-vector-cpp/
+    std::vector<std::vector<int>>::iterator it;
+    it =remove_if(y.begin(), y.end(), isEmpty);
 
     return retVals;
 }
@@ -316,7 +358,7 @@ sourcesRetStruct estsources(std::vector<int> x,
 //return M
 std::vector<std::vector<double>> estparams(
         std::vector<int>& D,
-        std::map<int, std::vector<int>>& y, int BEGIN, int END) {
+        std::vector<std::vector<int>> &y, int BEGIN, int END) {
     //std::map<char, std::map<char, double>> M;
     //int k;
 
@@ -325,21 +367,22 @@ std::vector<std::vector<double>> estparams(
     int k = 0;
 
     #pragma omp parallel for
-    for (auto [intKey, intVec]: y) {
+    for(int i = 0; i< y.size(); i++){
         int a = BEGIN;
-        int b = intVec[0];
+        int b = y[i].at(0);
         M.at(a).at(b) += 1.0;
 
-        for (int r=0; r <intVec.size()-1; r++) {
-            a = intVec.at(r);
-            b = intVec.at(r + 1);
+        for (int r=0; r <y[i].size()-1; r++) {
+            a = y[i].at(r);
+            b = y[i].at(r + 1);
             M.at(a).at(b) += 1.0;
         }
-        a = intVec.at(intVec.size() - 1);
+        a = y[i].at(y[i].size() - 1);
         b = END;
         M.at(a).at(b) += 1.0;
-
     }
+    
+
     M = normalizeGM(M);
 
     return M;
@@ -352,7 +395,7 @@ estimateRetVal estimate(std::vector<int>& x,
                         std::vector<std::vector<double>>& gM,
                         std::vector<std::vector<double>> M,
                         std::vector<int>& D,
-                        std::map<int, std::vector<int>> y,
+                        std::vector<std::vector<int>> &y,
                         size_t N, int BEGIN, int END) {
     std::vector<std::vector<int>> prevsseqs;
     std::cout << "Initializing source sequence..." << std::endl;

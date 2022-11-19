@@ -68,7 +68,8 @@ int main(){
     std::vector<int> s;
     //separate source sequences (y^{(k)} in the paper)
     //each nested vec can differ in size
-    std::map<int, std::vector<int>> y;
+    //std::map<int, std::vector<int>> y;
+    std::vector<std::vector<int>> y;
 
     //redefine begin and end with ints
     int BEGINInt = dDict[BEGIN];
@@ -83,16 +84,19 @@ int main(){
     y = retVal.intsY;
 
     //translate y back to chars from int
-    std::map<int, std::vector<char>> charY;
+    //std::map<int, std::vector<char>> charY;
+    std::vector<std::vector<char>> charY;
 
     #pragma omp parallel for
-    for(int i=0; i<y.size(); i++){
+    for(int i = 0; i< y.size(); i++){
         std::vector<char> subarr;
-        for(int j=0; j < y[i].size(); j++){
-            subarr.push_back(revDDict[y[i].at(j)]);
+        for(int j=0; j< y[i].size(); j++ ){
+            subarr.push_back(revDDict[y[i][j]]);
         }
-        charY[i] = subarr;
+        charY.push_back(subarr);
     }
+
+
 
 
     //bool modelCorrect = checkmodel(intsX, y, s);

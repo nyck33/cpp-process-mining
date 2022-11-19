@@ -12,7 +12,6 @@
 
 static std::map<std::string, double> normalizeProbs(std::map<std::string, double> &probs){
     double rowsum = 0.0;
-    #pragma omp parallel for
     for(auto & iter : probs){
         std::string str = iter.first;
         double prob = iter.second;
@@ -20,7 +19,6 @@ static std::map<std::string, double> normalizeProbs(std::map<std::string, double
         rowsum += prob;
     }
     if(rowsum > 0.0){
-        #pragma omp parallel for
         for(auto & iter : probs){
             //gmNestedMap[iter->first] = (gmNestedMap[iter->first] / rowsum);
             //gmNestedMap[iter->first] /= rowsum;
@@ -35,7 +33,6 @@ static std::map<std::string, double> normalizeProbs(std::map<std::string, double
 static std::map<char, double> _normalize(std::map<char, double> &gmNestedMap){
     //todo: need new instance of map to return for immutable
     double rowsum = 0.0;
-    #pragma omp parallel for
     for(auto & iter : gmNestedMap){
         char symbol = iter.first;
         double prob = iter.second;
@@ -43,7 +40,6 @@ static std::map<char, double> _normalize(std::map<char, double> &gmNestedMap){
         rowsum += prob;
     }
     if(rowsum > 0.0){
-        #pragma omp parallel for
         for(auto & iter : gmNestedMap){
             //gmNestedMap[iter->first] = (gmNestedMap[iter->first] / rowsum);
             //gmNestedMap[iter->first] /= rowsum;
@@ -57,7 +53,6 @@ static std::map<char, double> _normalize(std::map<char, double> &gmNestedMap){
 
 static std::map<char,double> normalize(std::map<char, double> &gmNestedMap){
     double rowsum = 0.0;
-    #pragma omp parallel for
     for(const auto& [ key, value] : gmNestedMap){
         rowsum += value;
     }
@@ -74,9 +69,10 @@ static std::map<char,double> normalize(std::map<char, double> &gmNestedMap){
 static std::string seq2str(const std::vector<char>& seq){
     std::string str;
     #pragma omp parallel for
-    for(auto elem : seq){
-        str += elem;
+    for(int i=0; i<seq.size(); i++){
+        str += seq[i];
     }
+
     return str;
 }
 
@@ -89,7 +85,6 @@ void sortByValue(std::map<std::string, double>& M){
     std::vector<std::pair<std::string, double>> A;
 
     //copy key-value pair from map to vector of pairs
-    #pragma omp parallel for
     for(auto& it : M){
         A.emplace_back(it);
     }
@@ -97,7 +92,6 @@ void sortByValue(std::map<std::string, double>& M){
     //sort with comparator algo
     sort(A.begin(), A.end(), cmp);
 
-    #pragma omp parallel for
     for(auto& it : A){
         std::cout << it.first << " " << it.second << std::endl;
     }
@@ -147,16 +141,20 @@ static bool compareVectors(std::vector<int> a, std::vector<int> b){
 
 static bool compareSToPrevSeqs(std::vector<int> s, std::vector<std::vector<int>> prevseqs){
     bool vecsMatch = false;
+    int matchCount = 0;
 
     #pragma omp parallel for
-    for(const auto& vec : prevseqs){
-        vecsMatch = compareVectors(s, vec);
+    for(int i=0; i < prevseqs.size(); i++){
+        vecsMatch = compareVectors(s, prevseqs[i]);
         if(vecsMatch){
-            return true;
+            matchCount++;
         }
     }
-    //none matched
+    if(matchCount > 0){
+        return true;
+    }
     return false;
+
 }
 
 
@@ -166,9 +164,10 @@ size_t count_items(const std::vector<int>& vec){
     std::set<int> counter;
 
     #pragma omp parallel for
-    for(const int & x : vec){
-        counter.insert(x);
+    for(int i=0; i<vec.size(); i++){
+        counter.insert(vec[i]);
     }
+
     size_t vecSize = counter.size();
     return vecSize;
 }

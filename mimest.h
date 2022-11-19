@@ -45,8 +45,9 @@ std::vector<int> translateXToInts(const std::vector<char>& x, std::map<char, int
     std::vector<int> intsX;
 
     #pragma omp parallel for
-    for(char i : x){
-        intsX.push_back(dDict[i]);
+    for(int i=0; i<x.size(); i++){
+        char a = x[i];
+        intsX.push_back(dDict[a]);
     }
 
     return intsX;

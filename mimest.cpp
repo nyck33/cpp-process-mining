@@ -79,6 +79,7 @@ int main(){
     estimateRetVal retVal = estimate(intsX,s,gM, M, intsD, y, N, BEGINInt, ENDInt);
     size_t K = retVal.K;
     M = retVal.M;
+    y = retVal.intsY;
 
     //translate y back to chars from int
     std::map<int, std::vector<char>> charY;
@@ -89,7 +90,7 @@ int main(){
             subarr.push_back(revDDict[num]);
         }
         charY[keyInt] = subarr;
-        subarr.clear();
+        //subarr.clear();
     }
 
     //bool modelCorrect = checkmodel(intsX, y, s);

@@ -29,6 +29,8 @@ struct sourcesRetStruct{
 struct estimateRetVal{
     size_t K{};
     std::vector<std::vector<double>> M;
+    std::map<int, std::vector<int>> intsY;
+
 
 };
 
@@ -379,6 +381,7 @@ estimateRetVal estimate(std::vector<int>& x,
     estimateRetVal retValStruct;
     retValStruct.K = count_items(s);
     retValStruct.M = M;
+    retValStruct.intsY = y;
     return retValStruct;
 
 }

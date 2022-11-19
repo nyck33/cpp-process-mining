@@ -190,7 +190,7 @@ void printModel(std::vector<std::vector<double>> T, std::vector<char> D,
 
 //computes the probability distribution for the different sequences produced by this model (p(z) or q(z) in the paper)
 //        std::map<int, std::vector<char>> y;
-std::map<std::string, double> seqprobs(std::map<int, std::vector<char>> y){
+std::map<std::string, double> seqprobs(std::map<int, std::vector<char>> &y){
     std::map<std::string, double> probs;
     for(auto & [intsKey, intsArr] : y){
         std::string z = seq2str(intsArr);
@@ -298,12 +298,33 @@ sourcesRetStruct estsources(std::vector<int> x,
 //return M
 std::vector<std::vector<double>> estparams(
         std::vector<int>& D,
-        std::map<int, std::vector<int>> y, int BEGIN, int END) {
+        std::map<int, std::vector<int>>& y, int BEGIN, int END) {
     //std::map<char, std::map<char, double>> M;
     //int k;
 
     std::vector<std::vector<double>> M = initializeGM(D);
 
+    int k = 0;
+    for (auto [intKey, intVec]: y) {
+        int a = BEGIN;
+        int b = intVec[0];
+        M.at(a).at(b) += 1.0;
+
+        for (int r=0; r <intVec.size()-1; r++) {
+            a = intVec.at(r);
+            b = intVec.at(r + 1);
+            M.at(a).at(b) += 1.0;
+        }
+        a = intVec.at(intVec.size() - 1);
+        b = END;
+        M.at(a).at(b) += 1.0;
+
+    }
+    M = normalizeGM(M);
+
+    return M;
+}
+    /*
     for (int k = 0; k < y.size(); k++) {
         //std::map<int, std::vector<char>> y;
         int a = BEGIN;
@@ -322,6 +343,7 @@ std::vector<std::vector<double>> estparams(
     M = normalizeGM(M);
     return M;
 }
+     */
 //estimate(x,s,gM, M, D, N);
 estimateRetVal estimate(std::vector<int>& x,
                         std::vector<int> s,

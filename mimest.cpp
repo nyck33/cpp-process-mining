@@ -33,8 +33,8 @@ int main(){
     //symbol sequence
     std::vector<char> x;
 
-    std::string inputFile = "/home/nobu/Documents/ProcessMining/cpp-process-mining/mocksequence.txt";
-    //std::string inputFile = "/home/nobu/Documents/ProcessMining/cpp-process-mining/learn/sequence.txt";
+    //std::string inputFile = "/home/nobu/Documents/ProcessMining/cpp-process-mining/mocksequence.txt";
+    std::string inputFile = "/home/nobu/Documents/ProcessMining/cpp-process-mining/learn/sequence.txt";
     x = openFileAndMakeVector(inputFile);
 
     std::cout << "symbol sequence: " << seq2str(x) << std::endl;

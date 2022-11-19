@@ -6,5 +6,5 @@ CXX_DEFINES =
 
 CXX_INCLUDES = -I/home/nobu/Documents/ProcessMining/cpp-process-mining/.
 
-CXX_FLAGS =  -fopenmp -g -std=gnu++14
+CXX_FLAGS = -g -std=gnu++14
 

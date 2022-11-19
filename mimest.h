@@ -18,6 +18,7 @@
 #include <cctype>
 #include <iomanip>
 #include <sstream>
+#include <omp.h>
 
 struct sourcesRetStruct{
     std::vector<int> s;
@@ -43,6 +44,7 @@ struct DdictStruct{
 std::vector<int> translateXToInts(const std::vector<char>& x, std::map<char, int>& dDict){
     std::vector<int> intsX;
 
+    #pragma omp parallel for
     for(char i : x){
         intsX.push_back(dDict[i]);
     }
@@ -53,6 +55,8 @@ std::vector<int> translateXToInts(const std::vector<char>& x, std::map<char, int
 DdictStruct makeDdict(std::vector<char> D){
     std::map<char, int> Ddict;
     std::map<int, char> revDdict;
+
+    #pragma omp parallel for
     for(int i = 0; i < D.size(); i++ ){
         Ddict[D[i]] = i;
         revDdict[i] = D[i];
@@ -73,10 +77,12 @@ std::vector<char> initializeD(std::vector<char> x, char begin, char end) {
     std::set<char> sortedSetX;
     unsigned size = x.size();
     //eliminate duplicates
+    #pragma omp parallel for
     for (unsigned i = 0; i < size; ++i) {
         sortedSetX.insert(x[i]);
     }
     //sort: https://linuxhint.com/sorting-elements-cpp-set/
+    #pragma omp parallel for
     for (char iter: sortedSetX) {
         if (std::isalpha(iter)) {
             D.push_back(iter);
@@ -91,10 +97,12 @@ std::vector<std::vector<double>> initializeGM(std::vector<int>& D) {
     std::vector<std::vector<double>> gM;
     std::vector<double> innerVec;
 
+    #pragma omp parallel for
     for(auto a: D){
         innerVec.push_back(0.0);
     }
 
+    #pragma omp parallel for
     for(auto b: D){
         gM.push_back(innerVec);
     }
@@ -108,7 +116,7 @@ std::vector<std::vector<double>> buildGM(std::vector<int> x,
 
     int a, b;
     //std::map<char, std::map<char, double>> newGM;
-
+    #pragma omp parallel for
     for (int n = 0; n < N - 1; n++) {
         a = x.at(n);
         b = x[n + 1];
@@ -122,6 +130,7 @@ std::vector<std::vector<double>> normalizeGM(std::vector<std::vector<double>> &g
     double rowsum;
     std::vector<double> rowsumsVec;
 
+    #pragma omp parallel for
     for (auto &vec: gM) {
         for(auto &b: vec){
             rowsum += b;
@@ -150,6 +159,7 @@ void printModel(std::vector<std::vector<double>> T, std::vector<char> D,
     outputStr = pad_right(blank, padSize);
     std::cout << outputStr;
     //top columns
+    #pragma omp parallel for
     for (auto a: D) {
         outputStr = std::string(1, a);
         outputStr = pad_right(outputStr, padSize);
@@ -157,6 +167,7 @@ void printModel(std::vector<std::vector<double>> T, std::vector<char> D,
     }
     std::cout << std::endl;
     //very left row names
+    #pragma omp parallel for
     for (auto a: D) {
         outputStr = std::string(1, a);
         outputStr = pad_right(outputStr, padSize);
@@ -194,6 +205,8 @@ void printModel(std::vector<std::vector<double>> T, std::vector<char> D,
 //        std::map<int, std::vector<char>> y;
 std::map<std::string, double> seqprobs(std::map<int, std::vector<char>> &y){
     std::map<std::string, double> probs;
+
+    #pragma omp parallel for
     for(auto & [intsKey, intsArr] : y){
         std::string z = seq2str(intsArr);
         if(probs.find(z) != probs.end()){
@@ -242,6 +255,8 @@ sourcesRetStruct estsources(std::vector<int> x,
     std::map<int, std::vector<int>> y;
     std::set<int> active;
     bool xnInYk = false;
+
+    #pragma omp parallel for
     for (int n = 0; n < N; n++) {
         int xn = x[n];
         double pmax = 0.0;
@@ -307,6 +322,8 @@ std::vector<std::vector<double>> estparams(
     std::vector<std::vector<double>> M = initializeGM(D);
 
     int k = 0;
+
+    #pragma omp parallel for
     for (auto [intKey, intVec]: y) {
         int a = BEGIN;
         int b = intVec[0];

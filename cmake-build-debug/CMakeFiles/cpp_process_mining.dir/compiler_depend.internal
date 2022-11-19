@@ -236,6 +236,7 @@ CMakeFiles/cpp_process_mining.dir/mimest.cpp.o
  /usr/include/c++/11/bits/quoted_string.h
  /usr/include/c++/11/sstream
  /usr/include/c++/11/bits/sstream.tcc
+ /usr/lib/gcc/x86_64-linux-gnu/11/include/omp.h
  /home/nobu/Documents/ProcessMining/cpp-process-mining/utils.h
  /home/nobu/Documents/ProcessMining/cpp-process-mining/mimest.h
 

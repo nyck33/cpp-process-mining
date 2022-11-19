@@ -235,6 +235,7 @@ CMakeFiles/cpp_process_mining.dir/mimest.cpp.o: ../mimest.cpp \
   /usr/include/c++/11/bits/quoted_string.h \
   /usr/include/c++/11/sstream \
   /usr/include/c++/11/bits/sstream.tcc \
+  /usr/lib/gcc/x86_64-linux-gnu/11/include/omp.h \
   ../utils.h \
   ../mimest.h
 
@@ -456,6 +457,8 @@ CMakeFiles/cpp_process_mining.dir/mimest.cpp.o: ../mimest.cpp \
 /usr/include/x86_64-linux-gnu/bits/wctype-wchar.h:
 
 /usr/include/x86_64-linux-gnu/bits/types/locale_t.h:
+
+/usr/lib/gcc/x86_64-linux-gnu/11/include/omp.h:
 
 /usr/include/stdlib.h:
 

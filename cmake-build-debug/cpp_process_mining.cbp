@@ -90,6 +90,9 @@
 		<Unit filename="/home/nobu/Documents/ProcessMining/cpp-process-mining/mimest.cpp">
 			<Option target="cpp_process_mining"/>
 		</Unit>
+		<Unit filename="/home/nobu/Documents/ProcessMining/cpp-process-mining/mimest.h">
+			<Option target="cpp_process_mining"/>
+		</Unit>
 		<Unit filename="/home/nobu/Documents/ProcessMining/cpp-process-mining/utils.h">
 			<Option target="cpp_process_mining"/>
 		</Unit>

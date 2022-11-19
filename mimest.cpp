@@ -19,6 +19,7 @@ test with mimgen.py created sequence.text first then try porting
 #include <cctype>
 #include <iomanip>
 #include <sstream>
+#include <omp.h>
 
 #include "utils.h"
 #include "mimest.h"
@@ -84,6 +85,7 @@ int main(){
     //translate y back to chars from int
     std::map<int, std::vector<char>> charY;
 
+    #pragma omp parallel for
     for (const auto& [keyInt, intVec]: y){
         std::vector<char> subarr;
         for (auto num: intVec){

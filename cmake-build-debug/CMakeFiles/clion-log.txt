@@ -1,4 +1,0 @@
-C:\Windows\system32\wsl.exe --distribution Ubuntu-22.04 --exec /bin/bash -c "export CMAKE_COLOR_DIAGNOSTICS=ON && export CLION_IDE=TRUE && export JETBRAINS_IDE=TRUE && cd /home/nobu/Documents/ProcessMining/cpp-process-mining/cmake-build-debug && /usr/bin/cmake -DCMAKE_BUILD_TYPE=Debug -G 'CodeBlocks - Unix Makefiles' -S /home/nobu/Documents/ProcessMining/cpp-process-mining -B /home/nobu/Documents/ProcessMining/cpp-process-mining/cmake-build-debug"
--- Configuring done
--- Generating done
--- Build files have been written to: /home/nobu/Documents/ProcessMining/cpp-process-mining/cmake-build-debug

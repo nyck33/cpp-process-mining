@@ -1,1 +1,0 @@
-/usr/bin/c++  -fopenmp -g CMakeFiles/cpp_process_mining.dir/mimest.cpp.o -o cpp_process_mining 

@@ -86,6 +86,14 @@ int main(){
     std::map<int, std::vector<char>> charY;
 
     #pragma omp parallel for
+    for(auto it = y.begin(); it != y.end(); it++ ){
+        std::vector<char> subarr;
+        for(auto num: it->second){
+            subarr.push_back(revDDict[num]);
+        }
+        charY[it->first] = subarr;
+    }
+    /*
     for (const auto& [keyInt, intVec]: y){
         std::vector<char> subarr;
         for (auto num: intVec){
@@ -94,6 +102,7 @@ int main(){
         charY[keyInt] = subarr;
         //subarr.clear();
     }
+    */
 
     //bool modelCorrect = checkmodel(intsX, y, s);
     //std::cout << "model is correct: " << modelCorrect << std::endl;

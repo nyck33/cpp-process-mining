@@ -43,10 +43,10 @@ struct DdictStruct{
 
 std::vector<int> translateXToInts(const std::vector<char>& x, std::map<char, int>& dDict){
     std::vector<int> intsX;
-
+    //std::vector<int>::iterator it;
     #pragma omp parallel for
-    for(char i : x){
-        intsX.push_back(dDict[i]);
+    for(auto it: x){
+        intsX.push_back(dDict[it]);
     }
 
     return intsX;

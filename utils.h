@@ -12,10 +12,11 @@
 
 static std::map<std::string, double> normalizeProbs(std::map<std::string, double> &probs){
     double rowsum = 0.0;
+
     #pragma omp parallel for
-    for(auto & iter : probs){
-        std::string str = iter.first;
-        double prob = iter.second;
+    for(auto it : probs){
+        std::string str = it.first;
+        double prob = it.second;
 
         rowsum += prob;
     }

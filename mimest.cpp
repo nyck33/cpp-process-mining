@@ -96,9 +96,6 @@ int main(){
         charY.push_back(subarr);
     }
 
-
-
-
     //bool modelCorrect = checkmodel(intsX, y, s);
     //std::cout << "model is correct: " << modelCorrect << std::endl;
     //print transition mat M

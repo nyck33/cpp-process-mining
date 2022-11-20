@@ -277,6 +277,7 @@ sourcesRetStruct estsources(std::vector<int> x,
     sourcesRetStruct retVals;
 
     std::vector<int> s;
+    //preallocate some vector in each y element and append
     std::vector<std::vector<int>> y;
     std::vector<int> emptyVec;
     //std::set<int> active;

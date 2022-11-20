@@ -42,13 +42,17 @@ struct DdictStruct{
 };
 
 std::vector<int> translateXToInts(const std::vector<char>& x, std::map<char, int>& dDict){
-    std::vector<int> intsX;
+    std::vector<int> intsX(x.size(), 0);
     //std::vector<int>::iterator it;
     #pragma omp parallel for
+    for(int i =0; i < x.size(); i++){
+        intsX[i] = dDict[x[i]];
+    }
+    /*
     for(auto it: x){
         intsX.push_back(dDict[it]);
     }
-
+    */
     return intsX;
 }
 
@@ -77,12 +81,11 @@ std::vector<char> initializeD(std::vector<char> x, char begin, char end) {
     std::set<char> sortedSetX;
     unsigned size = x.size();
     //eliminate duplicates
-    #pragma omp parallel for
+
     for (unsigned i = 0; i < size; ++i) {
         sortedSetX.insert(x[i]);
     }
     //sort: https://linuxhint.com/sorting-elements-cpp-set/
-    #pragma omp parallel for
     for (char iter: sortedSetX) {
         if (std::isalpha(iter)) {
             D.push_back(iter);
@@ -94,9 +97,11 @@ std::vector<char> initializeD(std::vector<char> x, char begin, char end) {
 }
 
 std::vector<std::vector<double>> initializeGM(std::vector<int>& D) {
-    std::vector<std::vector<double>> gM;
-    std::vector<double> innerVec;
 
+    std::vector<double> innerVec(D.size(), 0.0);
+    std::vector<std::vector<double>> gM(D.size(),innerVec);
+
+    /*
     #pragma omp parallel for
     for(auto a: D){
         innerVec.push_back(0.0);
@@ -106,7 +111,7 @@ std::vector<std::vector<double>> initializeGM(std::vector<int>& D) {
     for(auto b: D){
         gM.push_back(innerVec);
     }
-
+    */
     return gM;
 }
 

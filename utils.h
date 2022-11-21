@@ -13,7 +13,6 @@
 static std::map<std::string, double> normalizeProbs(std::map<std::string, double> &probs){
     double rowsum = 0.0;
     std::map<std::string, double>::iterator it;
-    #pragma omp parallel for
     for(it = probs.begin(); it != probs.end(); it++){
         std::string str = it->first;
         double prob = it->second;
@@ -21,7 +20,6 @@ static std::map<std::string, double> normalizeProbs(std::map<std::string, double
         rowsum += prob;
     }
     if(rowsum > 0.0){
-        #pragma omp parallel for
         for(auto & iter : probs){
             //gmNestedMap[iter->first] = (gmNestedMap[iter->first] / rowsum);
             //gmNestedMap[iter->first] /= rowsum;
@@ -32,7 +30,7 @@ static std::map<std::string, double> normalizeProbs(std::map<std::string, double
 
     return probs;
 }
-
+/*
 static std::map<char, double> _normalize(std::map<char, double> &gmNestedMap){
     //todo: need new instance of map to return for immutable
     double rowsum = 0.0;
@@ -70,11 +68,10 @@ static std::map<char,double> normalize(std::map<char, double> &gmNestedMap){
 
     return gmNestedMap;
 }
-
+*/
 
 static std::string seq2str(const std::vector<char>& seq){
     std::string str;
-    #pragma omp parallel for
     for(auto elem : seq){
         str += elem;
     }
@@ -90,7 +87,6 @@ void sortByValue(std::map<std::string, double>& M){
     std::vector<std::pair<std::string, double>> A;
 
     //copy key-value pair from map to vector of pairs
-    #pragma omp parallel for
     for(auto& it : M){
         A.emplace_back(it);
     }
@@ -98,7 +94,6 @@ void sortByValue(std::map<std::string, double>& M){
     //sort with comparator algo
     sort(A.begin(), A.end(), cmp);
 
-    #pragma omp parallel for
     for(auto& it : A){
         std::cout << it.first << " " << it.second << std::endl;
     }
@@ -148,16 +143,19 @@ static bool compareVectors(std::vector<int> a, std::vector<int> b){
 
 static bool compareSToPrevSeqs(std::vector<int> s, std::vector<std::vector<int>> prevseqs){
     bool vecsMatch = false;
-
+    int trueCount = 0;
     #pragma omp parallel for
-    for(const auto& vec : prevseqs){
-        vecsMatch = compareVectors(s, vec);
+    for(int i=0; i<prevseqs.size(); i++){
+        vecsMatch = compareVectors(s, prevseqs[i]);
         if(vecsMatch){
-            return true;
+            trueCount++;
         }
     }
-    //none matched
+    if(trueCount > 0){
+        return true;
+    }
     return false;
+
 }
 
 
@@ -165,8 +163,6 @@ static bool compareSToPrevSeqs(std::vector<int> s, std::vector<std::vector<int>>
 //https://stackoverflow.com/a/40851514/9481613
 size_t count_items(const std::vector<int>& vec){
     std::set<int> counter;
-
-    #pragma omp parallel for
     for(const int & x : vec){
         counter.insert(x);
     }

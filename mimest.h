@@ -101,17 +101,7 @@ std::vector<std::vector<double>> initializeGM(std::vector<int>& D) {
     std::vector<double> innerVec(D.size(), 0.0);
     std::vector<std::vector<double>> gM(D.size(),innerVec);
 
-    /*
-    #pragma omp parallel for
-    for(auto a: D){
-        innerVec.push_back(0.0);
-    }
 
-    #pragma omp parallel for
-    for(auto b: D){
-        gM.push_back(innerVec);
-    }
-    */
     return gM;
 }
 
@@ -135,18 +125,17 @@ std::vector<std::vector<double>> normalizeGM(std::vector<std::vector<double>> &g
     double rowsum;
     std::vector<double> rowsumsVec(gM.size(), 0);
 
-    #pragma omp parallel for default(none) shared(gM)
+    #pragma omp parallel for default(none) shared(gM, rowsumsVec)
     for(int i=0; i<gM.size(); i++)
-    for (auto &vec: gM) {
-        for(auto &b: vec){
-            rowsum += b;
-        }
-        if(rowsum > 0){
-            for(auto &c: vec){
-                c /= rowsum;
+    for (int j = 0; j<gM[i].size(); j++) {
+        rowsumsVec[i] += gM[i][j];
+
+        if(rowsumsVec[i] > 0) {
+            for (int k = 0; k < gM[i].size(); k++) {
+                gM[i][k] /= rowsumsVec[i];
             }
         }
-        rowsum = 0;
+
     }
 
     return gM;
@@ -165,7 +154,6 @@ void printModel(std::vector<std::vector<double>> T, std::vector<char> D,
     outputStr = pad_right(blank, padSize);
     std::cout << outputStr;
     //top columns
-    #pragma omp parallel for
     for (auto a: D) {
         outputStr = std::string(1, a);
         outputStr = pad_right(outputStr, padSize);
@@ -173,7 +161,6 @@ void printModel(std::vector<std::vector<double>> T, std::vector<char> D,
     }
     std::cout << std::endl;
     //very left row names
-    #pragma omp parallel for
     for (auto a: D) {
         outputStr = std::string(1, a);
         outputStr = pad_right(outputStr, padSize);
@@ -212,16 +199,15 @@ void printModel(std::vector<std::vector<double>> T, std::vector<char> D,
 std::map<std::string, double> seqprobs(std::map<int, std::vector<char>> &y){
     std::map<std::string, double> probs;
 
-    #pragma omp parallel for
-    for(auto & [intsKey, intsArr] : y){
-        std::string z = seq2str(intsArr);
-        if(probs.find(z) != probs.end()){
-            probs[z] += 1.0;
+    #pragma omp parallel for default(none) shared(probs, y)
+    for(int i=0; i<y.size(); i++){
+        if(probs.find(seq2str(y[i]))!= probs.end()){
+            probs[seq2str(y[i])] += 1.0;
         }else{
-            probs[z] = 1.0;
+            probs[seq2str(y[i])] = 1.0;
         }
-
     }
+
     normalizeProbs(probs);
     return probs;
 }
@@ -262,7 +248,6 @@ sourcesRetStruct estsources(std::vector<int> x,
     std::set<int> active;
     bool xnInYk = false;
 
-    #pragma omp parallel for
     for (int n = 0; n < N; n++) {
         int xn = x[n];
         double pmax = 0.0;
@@ -329,22 +314,22 @@ std::vector<std::vector<double>> estparams(
 
     int k = 0;
 
-    #pragma omp parallel for
-    for (auto [intKey, intVec]: y) {
+    #pragma omp parallel for default(none) shared(y, BEGIN, M, END)
+    for(int i = 0; i< y.size(); i++){
         int a = BEGIN;
-        int b = intVec[0];
+        int b = y[i][0];
         M.at(a).at(b) += 1.0;
 
-        for (int r=0; r <intVec.size()-1; r++) {
-            a = intVec.at(r);
-            b = intVec.at(r + 1);
-            M.at(a).at(b) += 1.0;
+        for(int r=0; r < y[i].size()-1; r++){
+            a = y[i][r];
+            b = y[i][r+1];
+            M[a][b] += 1.0;
         }
-        a = intVec.at(intVec.size() - 1);
+        a = y[i][y[i].size()-1];
         b = END;
-        M.at(a).at(b) += 1.0;
-
+        M[a][b] += 1.0;
     }
+
     M = normalizeGM(M);
 
     return M;

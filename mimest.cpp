@@ -32,8 +32,6 @@ endif()
 #include "mimest.h"
 
 
-
-
 int main(){
     char BEGIN='o';
     char END = 'x';
@@ -91,14 +89,15 @@ int main(){
 
     //translate y back to chars from int
     std::map<int, std::vector<char>> charY;
+    std::map<int, std::vector<char>>::iterator it;
 
-    #pragma omp parallel for
-    for(auto it = y.begin(); it != y.end(); it++ ){
-        std::vector<char> subarr;
-        for(auto num: it->second){
-            subarr.push_back(revDDict[num]);
+    #pragma omp parallel for default(none)
+    for(int i = 0; i < y.size(); i++){
+        std::vector<char> subarr(y[i].size(), 'a');
+        for(int j = 0; j< y[i].size(); j++){
+
+            subarr[j] = revDDict[y[i][j]];
         }
-        charY[it->first] = subarr;
     }
     /*
     for (const auto& [keyInt, intVec]: y){

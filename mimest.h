@@ -44,7 +44,7 @@ struct DdictStruct{
 std::vector<int> translateXToInts(const std::vector<char>& x, std::map<char, int>& dDict){
     std::vector<int> intsX(x.size(), 0);
     //std::vector<int>::iterator it;
-    #pragma omp parallel for
+    #pragma omp parallel for default(none) shared(x, dDict, intsX)
     for(int i =0; i < x.size(); i++){
         intsX[i] = dDict[x[i]];
     }
@@ -60,7 +60,7 @@ DdictStruct makeDdict(std::vector<char> D){
     std::map<char, int> Ddict;
     std::map<int, char> revDdict;
 
-    #pragma omp parallel for
+    #pragma omp parallel for default(none) shared(revDdict, Ddict, D)
     for(int i = 0; i < D.size(); i++ ){
         Ddict[D[i]] = i;
         revDdict[i] = D[i];
@@ -119,12 +119,12 @@ std::vector<std::vector<double>> buildGM(std::vector<int> x,
                                          std::vector<std::vector<double>> gM,
                                                size_t N) {
 
-    int a, b;
+    //int a, b;
     //std::map<char, std::map<char, double>> newGM;
-    #pragma omp parallel for
+    #pragma omp parallel for default(none) shared(N, x, gM)
     for (int n = 0; n < N - 1; n++) {
-        a = x.at(n);
-        b = x[n + 1];
+        int a = x.at(n);
+        int b = x[n + 1];
         gM.at(a).at(b) += 1.0;
     }
 
@@ -133,9 +133,10 @@ std::vector<std::vector<double>> buildGM(std::vector<int> x,
 
 std::vector<std::vector<double>> normalizeGM(std::vector<std::vector<double>> &gM) {
     double rowsum;
-    std::vector<double> rowsumsVec;
+    std::vector<double> rowsumsVec(gM.size(), 0);
 
-    #pragma omp parallel for
+    #pragma omp parallel for default(none) shared(gM)
+    for(int i=0; i<gM.size(); i++)
     for (auto &vec: gM) {
         for(auto &b: vec){
             rowsum += b;

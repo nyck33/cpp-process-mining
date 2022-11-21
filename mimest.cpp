@@ -91,7 +91,7 @@ int main(){
     std::map<int, std::vector<char>> charY;
     std::map<int, std::vector<char>>::iterator it;
 
-    #pragma omp parallel for default(none)
+    #pragma omp parallel for default(none) shared(revDDict, y)
     for(int i = 0; i < y.size(); i++){
         std::vector<char> subarr(y[i].size(), 'a');
         for(int j = 0; j< y[i].size(); j++){

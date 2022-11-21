@@ -317,7 +317,12 @@ std::vector<std::vector<double>> estparams(
     #pragma omp parallel for default(none) shared(y, BEGIN, M, END)
     for(int i = 0; i< y.size(); i++){
         int a = BEGIN;
-        int b = y[i][0];
+        int b;
+        if(y[i][0]){
+            b = y[i][0];
+        }else{
+            continue;
+        }
         M.at(a).at(b) += 1.0;
 
         for(int r=0; r < y[i].size()-1; r++){

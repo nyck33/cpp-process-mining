@@ -142,12 +142,12 @@ static bool compareVectors(std::vector<int> a, std::vector<int> b){
 }
 
 static bool compareSToPrevSeqs(std::vector<int> s, std::vector<std::vector<int>> prevseqs){
-    bool vecsMatch = false;
+    std::vector<bool> vecsMatch(prevseqs.size(), false);
     int trueCount = 0;
-    #pragma omp parallel for
+    #pragma omp parallel for default(none) shared(s, prevseqs, vecsMatch, trueCount)
     for(int i=0; i<prevseqs.size(); i++){
-        vecsMatch = compareVectors(s, prevseqs[i]);
-        if(vecsMatch){
+        vecsMatch[i] = compareVectors(s, prevseqs[i]);
+        if(vecsMatch[i]){
             trueCount++;
         }
     }

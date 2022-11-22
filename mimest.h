@@ -309,28 +309,25 @@ std::vector<std::vector<double>> estparams(
         std::map<int, std::vector<int>>& y, int BEGIN, int END) {
     //std::map<char, std::map<char, double>> M;
     //int k;
+    std::vector<double>MRow(D.size(), 0.0);
+    std::vector<std::vector<double>> M(D.size(),MRow);
 
-    std::vector<std::vector<double>> M = initializeGM(D);
+    //int k = 0;
 
-    int k = 0;
-
-    #pragma omp parallel for default(none) shared(y, BEGIN, M, END)
-    for(int i = 0; i< y.size(); i++){
+    //#pragma omp parallel for default(none) shared(y, BEGIN, M, END)
+    for(int k = 1; k< y.size(); k++){
         int a = BEGIN;
-        int b;
-        if(y[i][0]){
-            b = y[i][0];
-        }else{
-            continue;
-        }
+        int temp = k;
+        int b = y[k][0];
+
         M.at(a).at(b) += 1.0;
 
-        for(int r=0; r < y[i].size()-1; r++){
-            a = y[i][r];
-            b = y[i][r+1];
+        for(int r=0; r < y[k].size()-1; r++){
+            a = y[k][r];
+            b = y[k][r+1];
             M[a][b] += 1.0;
         }
-        a = y[i][y[i].size()-1];
+        a = y[k][y[k].size()-1];
         b = END;
         M[a][b] += 1.0;
     }
@@ -348,7 +345,8 @@ estimateRetVal estimate(std::vector<int>& x,
                         std::vector<std::vector<double>> M,
                         std::vector<int>& D,
                         std::map<int, std::vector<int>> y,
-                        size_t N, int BEGIN, int END) {
+                        size_t N, int BEGIN, int END, std::map<char, int> &dDict,
+                        std::vector<char> &charD) {
     std::vector<std::vector<int>> prevsseqs;
     std::cout << "Initializing source sequence..." << std::endl;
     sourcesRetStruct srcsSY = estsources(x, D, N, gM, BEGIN, END);
@@ -370,6 +368,8 @@ estimateRetVal estimate(std::vector<int>& x,
         srcsSY = estsources(x, D, N, M, BEGIN, END);
         y = srcsSY.y;
         s = srcsSY.s;
+
+        printModel(M, charD, dDict);
 
     }
     //return num unique items

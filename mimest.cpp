@@ -82,7 +82,7 @@ int main(){
     //////call init funcs
 
     //estimate model
-    estimateRetVal retVal = estimate(intsX,s,gM, M, intsD, y, N, BEGINInt, ENDInt);
+    estimateRetVal retVal = estimate(intsX,s,gM, M, intsD, y, N, BEGINInt, ENDInt, dDict, D);
     size_t K = retVal.K;
     M = retVal.M;
     y = retVal.intsY;
